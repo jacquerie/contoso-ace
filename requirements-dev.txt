@@ -1,0 +1,8 @@
+-r requirements.txt
+
+attrs==18.2.0
+flake8==3.6.0
+pytest-cov==2.6.0
+pytest-flask==0.14.0
+pytest-mock==1.10.0
+pytest==4.0.2

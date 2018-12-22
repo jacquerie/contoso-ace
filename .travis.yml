@@ -1,0 +1,47 @@
+notifications:
+  email: false
+
+dist: trusty
+
+sudo: required
+
+addons:
+  postgresql: 10
+  apt:
+    packages:
+      - postgresql-10
+      - postgresql-client-10
+
+env:
+  global:
+    - DATABASE_URL=postgres://admin:password@localhost:5433/contoso_ace
+    - PGPORT=5433
+
+language: python
+
+cache: pip
+
+python:
+  - 3.6
+
+matrix:
+  fast_finish: true
+
+before_install:
+  - travis_retry pip install --upgrade pip setuptools
+  - travis_retry pip install coveralls
+
+install:
+  - travis_retry pip install -r requirements-dev.txt
+
+before_script:
+  - sudo -u postgres createdb contoso_ace
+  - sudo -u postgres psql contoso_ace -c "create user admin with password 'password'"
+  - sudo -u postgres psql contoso_ace -c 'grant all privileges on database "contoso_ace" to admin'
+  - python -c 'from app import db; db.create_all()'
+
+script:
+  - ./run-tests.sh
+
+after_success:
+  - travis_retry coveralls
