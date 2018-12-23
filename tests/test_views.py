@@ -182,3 +182,20 @@ def test_api_chat_by_id_returns_200_and_the_requested_chat(client, mocker):
     result = json.loads(response.data)
 
     assert expected == result
+
+
+def test_api_chat_add_entity_returns_200(client, mocker):
+    mock_session = mocker.patch('app.db.session')
+
+    response = client.post(
+        url_for('api_chat_add_entity', chat_id=1),
+        content_type='application/json',
+        data=json.dumps({
+            'snippet': 'Paris',
+            'type': 'LOC',
+        }),
+    )
+
+    mock_session.add.assert_called_once()
+    mock_session.commit.assert_called_once_with()
+    assert response.status_code == 200

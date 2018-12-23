@@ -151,6 +151,25 @@ def api_chat_by_id(chat_id):
     }), 200
 
 
+@app.route('/api/chats/<int:chat_id>/entities', methods=['POST'])
+def api_chat_add_entity(chat_id):
+    entity_data = request.get_json(force=True)
+    entity = Entity(
+        chat_id=chat_id,
+        snippet=entity_data['snippet'],
+        type=entity_data['type'],
+    )
+    db.session.add(entity)
+    db.session.commit()
+
+    return jsonify({
+        '_id': entity.id,
+        'chat_id': entity.chat_id,
+        'snippet': entity.snippet,
+        'type': entity.type,
+    }), 200
+
+
 class Message(db.Model):
     id = db.Column(db.Integer(), primary_key=True)
     chat_id = db.Column(
