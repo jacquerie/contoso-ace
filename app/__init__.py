@@ -134,6 +134,13 @@ def api_chat_by_id(chat_id):
             'first_name': chat.customer.first_name,
             'full_name': chat.customer.full_name,
         },
+        'entities': [
+            {
+                '_id': entity.id,
+                'snippet': entity.snippet,
+                'type': entity.type,
+            } for entity in chat.entities
+        ],
         'messages': [
             {
                 '_id': message.id,
@@ -154,6 +161,15 @@ class Message(db.Model):
     timestamp = db.Column(db.BigInteger(), nullable=False)
 
 
+class Entity(db.Model):
+    id = db.Column(db.Integer(), primary_key=True)
+    chat_id = db.Column(
+        db.Integer(), db.ForeignKey('chat.id'), nullable=False)
+    snippet = db.Column(db.String(), nullable=False)
+    type = db.Column(
+        db.Enum('DATE', 'LOC', 'TIME', name='type_enum'), nullable=False)
+
+
 class Chat(db.Model):
     id = db.Column(db.Integer(), primary_key=True)
     customer_id = db.Column(
@@ -161,6 +177,8 @@ class Chat(db.Model):
     employee_id = db.Column(
         db.Integer(), db.ForeignKey('employee.id'))
     last_timestamp = db.Column(db.BigInteger(), nullable=False)
+    entities = db.relationship(
+        'Entity', backref='chat', lazy='selectin', order_by=Entity.id)
     messages = db.relationship(
         'Message', backref='chat', lazy='selectin',
         order_by=Message.timestamp)

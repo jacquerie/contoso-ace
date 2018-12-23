@@ -10,6 +10,7 @@ from flask import url_for
 class MockChat:
     id = attr.ib()
     customer = attr.ib()
+    entities = attr.ib()
     messages = attr.ib()
 
 
@@ -18,6 +19,13 @@ class MockCustomer:
     id = attr.ib()
     first_name = attr.ib()
     full_name = attr.ib()
+
+
+@attr.s
+class MockEntity:
+    id = attr.ib()
+    snippet = attr.ib()
+    type = attr.ib()
 
 
 @attr.s
@@ -97,9 +105,10 @@ def test_api_chats_returns_200_and_the_unassigned_chats(client, mocker):
             id=1,
             customer=MockCustomer(
                 id=1, first_name='Mark', full_name='Mark Zuckerberg'),
+            entities=[MockEntity(id=1, snippet='Paris', type='LOC')],
             messages=[
                 MockMessage(id=1, text='Cool app!', timestamp=1545592339658),
-                MockMessage(id=2, text='Good luck.', timestamp=1545592340658),
+                MockMessage(id=2, text='Good luck for Paris.', timestamp=1545592340658),
             ],
         ),
     ])
@@ -132,9 +141,10 @@ def test_api_chat_by_id_returns_200_and_the_requested_chat(client, mocker):
         id=1,
         customer=MockCustomer(
             id=1, first_name='Mark', full_name='Mark Zuckerberg'),
+        entities=[MockEntity(id=1, snippet='Paris', type='LOC')],
         messages=[
             MockMessage(id=1, text='Cool app!', timestamp=1545592339658),
-            MockMessage(id=2, text='Good luck.', timestamp=1545592340658),
+            MockMessage(id=2, text='Good luck for Paris.', timestamp=1545592340658),
         ],
     ))
 
@@ -149,6 +159,13 @@ def test_api_chat_by_id_returns_200_and_the_requested_chat(client, mocker):
             'first_name': 'Mark',
             'full_name': 'Mark Zuckerberg',
         },
+        'entities': [
+            {
+                '_id': 1,
+                'snippet': 'Paris',
+                'type': 'LOC',
+            },
+        ],
         'messages': [
             {
                 '_id': 1,
@@ -157,7 +174,7 @@ def test_api_chat_by_id_returns_200_and_the_requested_chat(client, mocker):
             },
             {
                 '_id': 2,
-                'text': 'Good luck.',
+                'text': 'Good luck for Paris.',
                 'timestamp': 1545592340658,
             },
         ],
