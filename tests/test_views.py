@@ -173,12 +173,8 @@ def test_webhook_post_modifies_the_current_chat_if_it_exists(client, config, moc
 def test_api_chats_returns_200_and_the_unassigned_chats(client, mocker):
     mocker.patch('app.Chat.get_unassigned_chats', return_value=[
         MockChat(
-            id=1,
-            customer=MockCustomer(
-                id=1, first_name='Mark', full_name='Mark Zuckerberg'),
-            entities=[MockEntity(id=1, snippet='Paris', type='LOC')],
             messages=[
-                MockMessage(id=1, text='Cool app!', timestamp=1545592339658),
+                MockMessage(),
                 MockMessage(id=2, text='Good luck for Paris.', timestamp=1545592340658),
             ],
         ),
@@ -209,12 +205,9 @@ def test_api_chats_returns_200_and_the_unassigned_chats(client, mocker):
 
 def test_api_chat_by_id_returns_200_and_the_requested_chat(client, mocker):
     mocker.patch('app.Chat.get_chat_by_id', return_value=MockChat(
-        id=1,
-        customer=MockCustomer(
-            id=1, first_name='Mark', full_name='Mark Zuckerberg'),
-        entities=[MockEntity(id=1, snippet='Paris', type='LOC')],
+        entities=[MockEntity()],
         messages=[
-            MockMessage(id=1, text='Cool app!', timestamp=1545592339658),
+            MockMessage(),
             MockMessage(id=2, text='Good luck for Paris.', timestamp=1545592340658),
         ],
     ))
