@@ -8,8 +8,17 @@ from flask import url_for
 
 
 @attr.s
+class MockEmployee:
+    id = attr.ib(default=1)
+    email = attr.ib(default='barbara@contoso.com')
+    password = attr.ib(default='password')
+    chats = attr.ib(factory=list)
+
+
+@attr.s
 class MockCustomer:
     id = attr.ib(default=1)
+    facebook_id = attr.ib(default='4')
     first_name = attr.ib(default='Mark')
     full_name = attr.ib(default='Mark Zuckerberg')
     chats = attr.ib(factory=list)
@@ -19,6 +28,9 @@ class MockCustomer:
 class MockChat:
     id = attr.ib(default=1)
     customer = attr.ib(factory=MockCustomer)
+    customer_id = attr.ib(default=1)
+    employee = attr.ib(factory=MockEmployee)
+    employee_id = attr.ib(default=1)
     last_timestamp = attr.ib(default=1545592338658)
     entities = attr.ib(factory=list)
     messages = attr.ib(factory=list)
@@ -27,6 +39,8 @@ class MockChat:
 @attr.s
 class MockEntity:
     id = attr.ib(default=1)
+    chat = attr.ib(factory=MockChat)
+    chat_id = attr.ib(default=1)
     snippet = attr.ib(default='Paris')
     type = attr.ib(default='LOC')
 
@@ -34,6 +48,9 @@ class MockEntity:
 @attr.s
 class MockMessage:
     id = attr.ib(default=1)
+    chat = attr.ib(factory=MockChat)
+    chat_id = attr.ib(default=1)
+    sender = attr.ib(default='customer')
     text = attr.ib(default='Cool app!')
     timestamp = attr.ib(default=1545592339658)
 
