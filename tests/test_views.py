@@ -68,6 +68,7 @@ def test_webhook_get_returns_200_on_successful_challenge(client, config, mocker)
     response = client.get(
         url_for('webhook_get', **{
             'hub.challenge': 'CHALLENGE',
+            'hub.mode': 'subscribe',
             'hub.verify_token': 'SECRET',
         })
     )
@@ -82,6 +83,7 @@ def test_wehook_get_returns_403_on_failed_challenge(client, config, mocker):
     response = client.get(
         url_for('webhook_get', **{
             'hub.challenge': 'CHALLENGE',
+            'hub.mode': 'subscribe',
             'hub.verify_token': 'WRONG',
         })
     )
