@@ -112,6 +112,44 @@ def test_webhook_post_returns_200_and_handles_the_event(client, config, mocker):
     assert b'OK' in response.data
 
 
+def test_webhook_post_modifies_the_current_chat_if_it_exists(client, config, mocker):
+    mock_session = mocker.patch('app.db.session')
+    mocker.patch(
+        'app.Customer.get_customer_by_facebook_id',
+        return_value=MockCustomer(chats=[MockChat()]))
+    mocker.patch.dict(config, {'FACEBOOK_PAGE_TOKEN': 'SECRET'})
+
+    webhook_event = {
+        'entry': [
+            {
+                'messaging': [
+                    {
+                        'message': {
+                            'text': 'Good luck for Paris.',
+                        },
+                        'sender': {
+                            'id': '4',
+                        },
+                        'timestamp': 1545592340658,
+                    },
+                ],
+            },
+        ],
+    }
+
+    response = client.post(
+        url_for('webhook_post'),
+        content_type='application/json',
+        data=json.dumps(webhook_event),
+    )
+
+    assert mock_session.add.call_count == 2
+    assert mock_session.commit.call_count == 2
+    mock_session.commit.assert_has_calls([mock.call(), mock.call()])
+    assert response.status_code == 200
+    assert b'OK' in response.data
+
+
 def test_api_chats_returns_200_and_the_unassigned_chats(client, mocker):
     mocker.patch('app.Chat.get_unassigned_chats', return_value=[
         MockChat(
