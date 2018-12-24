@@ -1,21 +1,19 @@
 notifications:
   email: false
 
-dist: trusty
+dist: xenial
 
 sudo: required
 
 addons:
   postgresql: 10
-  apt:
-    packages:
-      - postgresql-10
-      - postgresql-client-10
+
+services:
+  - postgresql
 
 env:
   global:
-    - DATABASE_URL=postgres://admin:password@localhost:5433/contoso_ace
-    - PGPORT=5433
+    - DATABASE_URL=postgresql://travis
 
 language: python
 
@@ -35,9 +33,6 @@ install:
   - travis_retry pip install -r requirements-dev.txt
 
 before_script:
-  - sudo -u postgres createdb contoso_ace
-  - sudo -u postgres psql contoso_ace -c "create user admin with password 'password'"
-  - sudo -u postgres psql contoso_ace -c 'grant all privileges on database "contoso_ace" to admin'
   - python -c 'from app import db; db.create_all()'
 
 script:
