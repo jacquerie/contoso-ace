@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import json
+from unittest import mock
 
 import attr
 from flask import url_for
@@ -70,8 +71,12 @@ def test_wehook_get_returns_403_on_failed_challenge(client, config, mocker):
     assert b'FACEBOOK_VERIFY_TOKEN' in response.data
 
 
-def test_webhook_post_returns_200_and_handles_the_message(client, config, mocker):
-    mocked_handler = mocker.patch('app.Messenger.handle')
+def test_webhook_post_returns_200_and_handles_the_event(client, config, mocker):
+    mock_session = mocker.patch('app.db.session')
+    mocker.patch('app.MessengerClient.get_user_data', return_value={
+        'first_name': 'Mark',
+        'last_name': 'Zuckerberg',
+    })
     mocker.patch.dict(config, {'FACEBOOK_PAGE_TOKEN': 'SECRET'})
 
     webhook_event = {
@@ -80,8 +85,12 @@ def test_webhook_post_returns_200_and_handles_the_message(client, config, mocker
                 'messaging': [
                     {
                         'message': {
-                            'text': 'Hello, world!',
+                            'text': 'Cool app!',
                         },
+                        'sender': {
+                            'id': '4',
+                        },
+                        'timestamp': 1545592339658,
                     },
                 ],
             },
@@ -94,7 +103,9 @@ def test_webhook_post_returns_200_and_handles_the_message(client, config, mocker
         data=json.dumps(webhook_event),
     )
 
-    mocked_handler.assert_called_once_with(webhook_event)
+    mock_session.add.assert_called()
+    mock_session.commit.assert_has_calls([
+        mock.call(), mock.call(), mock.call()])
     assert response.status_code == 200
     assert b'OK' in response.data
 

@@ -2,71 +2,12 @@
 
 import os
 
-from fbmessenger import BaseMessenger
+from fbmessenger import MessengerClient
 from flask import Flask, current_app, jsonify, render_template, request
 from flask_bcrypt import Bcrypt
 from flask_sqlalchemy import SQLAlchemy
 
 DAY = 24 * 60 * 60 * 1000
-
-
-class Messenger(BaseMessenger):
-    def __init__(self, page_access_token):
-        self.page_access_token = page_access_token
-        super(Messenger, self).__init__(self.page_access_token)
-
-    def account_linking(self, message):
-        pass  # pragma: nocover
-
-    def delivery(self, message):
-        pass  # pragma: nocover
-
-    def message(self, message):
-        facebook_id = self.get_user_id()
-        customer = Customer.get_customer_by_facebook_id(facebook_id)
-        if not customer:
-            customer_data = self.get_user()
-            customer = Customer(
-                facebook_id=facebook_id,
-                first_name=customer_data['first_name'],
-                full_name='{} {}'.format(
-                    customer_data['first_name'],
-                    customer_data['last_name'],
-                ),
-            )
-            db.session.add(customer)
-            db.session.commit()
-
-        timestamp = message['timestamp']
-        if customer.chats and customer.chats[-1].last_timestamp - timestamp < DAY:
-            chat = customer.chats[-1]
-            chat.last_timestamp = timestamp
-        else:
-            chat = Chat(
-                customer_id=customer.id,
-                last_timestamp=timestamp,
-            )
-        db.session.add(chat)
-        db.session.commit()
-
-        text = message['message'].get('text', '')
-        message = Message(
-            chat_id=chat.id,
-            sender='customer',
-            text=text,
-            timestamp=timestamp,
-        )
-        db.session.add(message)
-        db.session.commit()
-
-    def optin(self, message):
-        pass  # pragma: nocover
-
-    def postback(self, message):
-        pass  # pragma: nocover
-
-    def read(self, message):
-        pass  # pragma: nocover
 
 
 class Config:
@@ -100,8 +41,49 @@ def webhook_get():
 @app.route('/webhook', methods=['POST'])
 def webhook_post():
     facebook_page_token = current_app.config['FACEBOOK_PAGE_TOKEN']
-    messenger = Messenger(facebook_page_token)
-    messenger.handle(request.get_json(force=True))
+    messenger_client = MessengerClient(facebook_page_token)
+
+    webhook_event_data = request.get_json(force=True)
+    for entry in webhook_event_data['entry']:
+        for message in entry['messaging']:
+            if message.get('message'):
+                facebook_id = message['sender']['id']
+                customer = Customer.get_customer_by_facebook_id(facebook_id)
+                if not customer:
+                    customer_data = messenger_client.get_user_data(message)
+                    customer = Customer(
+                        facebook_id=facebook_id,
+                        first_name=customer_data['first_name'],
+                        full_name='{} {}'.format(
+                            customer_data['first_name'],
+                            customer_data['last_name'],
+                        )
+                    )
+                    db.session.add(customer)
+                    db.session.commit()
+
+                timestamp = message['timestamp']
+                if customer.chats and customer.chats[-1].last_timestamp - timestamp < DAY:
+                    chat = customer.chats[-1]
+                    chat.last_timestamp = timestamp
+                else:
+                    chat = Chat(
+                        customer_id=customer.id,
+                        last_timestamp=timestamp,
+                    )
+                db.session.add(chat)
+                db.session.commit()
+
+                text = message['message'].get('text', '')
+                message = Message(
+                    chat_id=chat.id,
+                    sender='customer',
+                    text=text,
+                    timestamp=timestamp,
+                )
+                db.session.add(message)
+                db.session.commit()
+
     return 'OK', 200
 
 
