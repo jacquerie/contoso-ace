@@ -105,7 +105,8 @@ def test_webhook_post_returns_200_and_handles_the_event(client, config, mocker):
         data=json.dumps(webhook_event),
     )
 
-    mock_session.add.assert_called()
+    assert mock_session.add.call_count == 3
+    assert mock_session.commit.call_count == 3
     mock_session.commit.assert_has_calls([
         mock.call(), mock.call(), mock.call()])
     assert response.status_code == 200
