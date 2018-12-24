@@ -33,6 +33,7 @@ def root():
 @app.route('/webhook', methods=['GET'])
 def webhook_get():
     facebook_verify_token = current_app.config['FACEBOOK_VERIFY_TOKEN']
+
     if request.args.get('hub.verify_token') == facebook_verify_token:
         return request.args.get('hub.challenge'), 200
     return 'FACEBOOK_VERIFY_TOKEN does not match', 403
@@ -90,6 +91,7 @@ def webhook_post():
 @app.route('/api/chats', methods=['GET'])
 def api_chats():
     chats = Chat.get_unassigned_chats()
+
     return jsonify([
         {
             '_id': chat.id,
@@ -109,6 +111,7 @@ def api_chats():
 @app.route('/api/chats/<int:chat_id>', methods=['GET'])
 def api_chat_by_id(chat_id):
     chat = Chat.get_chat_by_id(chat_id)
+
     return jsonify({
         '_id': chat.id,
         'customer': {
