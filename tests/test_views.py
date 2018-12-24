@@ -270,3 +270,19 @@ def test_api_chat_add_entity_returns_200(client, mocker):
     mock_session.add.assert_called_once()
     mock_session.commit.assert_called_once_with()
     assert response.status_code == 200
+
+
+def test_api_chat_add_message_returns_200(client, config, mocker):
+    mock_session = mocker.patch('app.db.session')
+    mocker.patch('app.Chat.get_chat_by_id', return_value=MockChat())
+    mocker.patch.dict(config, {'FACEBOOK_PAGE_TOKEN': 'SECRET'})
+
+    response = client.post(
+        url_for('api_chat_add_message', chat_id=1),
+        content_type='application/json',
+        data=json.dumps({'text': 'Thanks!'}),
+    )
+
+    mock_session.add.assert_called_once()
+    mock_session.commit.assert_called_once_with()
+    assert response.status_code == 200

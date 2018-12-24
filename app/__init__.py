@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import os
+from datetime import datetime
 
 from fbmessenger import MessengerClient
 from flask import Flask, current_app, jsonify, render_template, request
@@ -153,6 +154,36 @@ def api_chat_add_entity(chat_id):
         'chat_id': entity.chat_id,
         'snippet': entity.snippet,
         'type': entity.type,
+    }), 200
+
+
+@app.route('/api/chats/<int:chat_id>/messages', methods=['POST'])
+def api_chat_add_message(chat_id):
+    facebook_page_token = current_app.config['FACEBOOK_PAGE_TOKEN']
+    messenger_client = MessengerClient(facebook_page_token)
+
+    message_data = request.get_json(force=True)
+
+    chat = Chat.get_chat_by_id(chat_id)
+    messenger_client.send(
+        {'text': message_data['text']},
+        {'sender': {'id': chat.customer.facebook_id}},
+        'RESPONSE',
+    )
+
+    message = Message(
+        chat_id=chat_id,
+        text=message_data['text'],
+        timestamp=int(datetime.now().timestamp() * 1000)
+    )
+    db.session.add(message)
+    db.session.commit()
+
+    return jsonify({
+        '_id': message.id,
+        'chat_id': message.chat_id,
+        'text': message.text,
+        'timestamp': message.timestamp,
     }), 200
 
 
