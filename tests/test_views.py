@@ -8,32 +8,34 @@ from flask import url_for
 
 
 @attr.s
-class MockChat:
-    id = attr.ib()
-    customer = attr.ib()
-    entities = attr.ib()
-    messages = attr.ib()
+class MockCustomer:
+    id = attr.ib(default=1)
+    first_name = attr.ib(default='Mark')
+    full_name = attr.ib(default='Mark Zuckerberg')
+    chats = attr.ib(factory=list)
 
 
 @attr.s
-class MockCustomer:
-    id = attr.ib()
-    first_name = attr.ib()
-    full_name = attr.ib()
+class MockChat:
+    id = attr.ib(default=1)
+    customer = attr.ib(factory=MockCustomer)
+    last_timestamp = attr.ib(default=1545592338658)
+    entities = attr.ib(factory=list)
+    messages = attr.ib(factory=list)
 
 
 @attr.s
 class MockEntity:
-    id = attr.ib()
-    snippet = attr.ib()
-    type = attr.ib()
+    id = attr.ib(default=1)
+    snippet = attr.ib(default='Paris')
+    type = attr.ib(default='LOC')
 
 
 @attr.s
 class MockMessage:
-    id = attr.ib()
-    text = attr.ib()
-    timestamp = attr.ib()
+    id = attr.ib(default=1)
+    text = attr.ib(default='Cool app!')
+    timestamp = attr.ib(default=1545592339658)
 
 
 def test_root_returns_200_and_renders_a_template(client):
