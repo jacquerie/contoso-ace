@@ -159,6 +159,20 @@ def api_chat_by_id(chat_id):
     }), 200
 
 
+@app.route('/api/chats/<int:chat_id>/employees', methods=['POST'])
+@login_required
+def api_chat_add_employee(chat_id):
+    chat = Chat.get_chat_by_id(chat_id)
+    if chat.employee_id:
+        return jsonify({'success': False}), 403
+
+    chat.employee_id = current_user.id
+    db.session.add(chat)
+    db.session.commit()
+
+    return jsonify({'success': True}), 200
+
+
 @app.route('/api/chats/<int:chat_id>/entities', methods=['POST'])
 @login_required
 def api_chat_add_entity(chat_id):

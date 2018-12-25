@@ -256,6 +256,29 @@ def test_api_chat_by_id_returns_403_when_chat_is_not_assigned_to_employee(client
     assert response.status_code == 403
 
 
+def test_api_chat_add_employee_returns_200_when_chat_is_not_assigned_to_employee(client, mocker):
+    mock_session = mocker.patch('app.db.session')
+    mocker.patch('app.current_user', MockEmployee())
+    mocker.patch('app.Chat.get_chat_by_id', return_value=MockChat(employee_id=None))
+
+    response = client.post(url_for('api_chat_add_employee', chat_id=1))
+
+    mock_session.add.assert_called_once()
+    mock_session.commit.assert_called_once_with()
+    assert response.status_code == 200
+
+
+def test_api_chat_add_employee_returns_403_when_chat_is_assigned_to_employee(client, mocker):
+    mock_session = mocker.patch('app.db.session')
+    mocker.patch('app.Chat.get_chat_by_id', return_value=MockChat())
+
+    response = client.post(url_for('api_chat_add_employee', chat_id=1))
+
+    mock_session.add.assert_not_called()
+    mock_session.commit.assert_not_called()
+    assert response.status_code == 403
+
+
 def test_api_chat_add_entity_returns_200(client, mocker):
     mock_session = mocker.patch('app.db.session')
     mocker.patch('app.current_user', MockEmployee())
