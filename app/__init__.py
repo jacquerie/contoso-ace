@@ -149,6 +149,7 @@ def api_chat_by_id(chat_id):
                 'type': entity.type,
             } for entity in chat.entities
         ],
+        'intent': chat.intent,
         'messages': [
             {
                 '_id': message.id,
@@ -276,6 +277,7 @@ class Chat(db.Model):
         db.Integer(), db.ForeignKey('customer.id'), nullable=False)
     employee_id = db.Column(
         db.Integer(), db.ForeignKey('employee.id'))
+    intent = db.Column(db.String())
     last_timestamp = db.Column(db.BigInteger(), nullable=False)
     entities = db.relationship(
         'Entity', backref='chat', lazy='selectin', order_by=Entity.id)

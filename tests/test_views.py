@@ -31,6 +31,7 @@ class MockChat:
     customer_id = attr.ib(default=1)
     employee = attr.ib(factory=MockEmployee)
     employee_id = attr.ib(default=1)
+    intent = attr.ib(default=None)
     last_timestamp = attr.ib(default=1545592338658)
     entities = attr.ib(factory=list)
     messages = attr.ib(factory=list)
@@ -230,6 +231,7 @@ def test_api_chat_by_id_returns_200_and_the_requested_chat(client, mocker):
                 'type': 'LOC',
             },
         ],
+        'intent': None,
         'messages': [
             {
                 '_id': 1,
