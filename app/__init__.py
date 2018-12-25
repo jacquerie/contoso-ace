@@ -46,8 +46,9 @@ def webhook_post():
     facebook_page_token = current_app.config['FACEBOOK_PAGE_TOKEN']
     messenger_client = MessengerClient(facebook_page_token)
 
-    webhook_event_data = request.get_json(force=True)
-    for entry in webhook_event_data['entry']:
+    event_data = request.get_json(force=True)
+
+    for entry in event_data['entry']:
         for message in entry['messaging']:
             if message.get('message'):
                 facebook_id = message['sender']['id']
@@ -141,6 +142,7 @@ def api_chat_by_id(chat_id):
 @app.route('/api/chats/<int:chat_id>/entities', methods=['POST'])
 def api_chat_add_entity(chat_id):
     entity_data = request.get_json(force=True)
+
     entity = Entity(
         chat_id=chat_id,
         snippet=entity_data['snippet'],
