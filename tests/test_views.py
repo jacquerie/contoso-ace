@@ -134,7 +134,8 @@ def test_webhook_post_modifies_the_current_chat_if_it_exists(client, config, moc
     mock_session = mocker.patch('app.db.session')
     mocker.patch(
         'app.Customer.get_customer_by_facebook_id',
-        return_value=MockCustomer(chats=[MockChat()]))
+        return_value=MockCustomer(chats=[MockChat()]),
+    )
     mocker.patch.dict(config, {'FACEBOOK_PAGE_TOKEN': 'SECRET'})
 
     response = client.post(
@@ -248,8 +249,8 @@ def test_api_chat_by_id_returns_200_and_the_requested_chat(client, mocker):
 
 
 def test_api_chat_by_id_returns_403_when_chat_is_not_assigned_to_employee(client, mocker):
-    mocker.patch('app.current_user', MockEmployee(id=2))
-    mocker.patch('app.Chat.get_chat_by_id', return_value=MockChat())
+    mocker.patch('app.current_user', MockEmployee())
+    mocker.patch('app.Chat.get_chat_by_id', return_value=MockChat(employee_id=None))
 
     response = client.get(url_for('api_chat_by_id', chat_id=1))
 
@@ -269,17 +270,14 @@ def test_api_chat_add_employee_returns_200_when_chat_is_not_assigned_to_employee
 
 
 def test_api_chat_add_employee_returns_403_when_chat_is_assigned_to_employee(client, mocker):
-    mock_session = mocker.patch('app.db.session')
     mocker.patch('app.Chat.get_chat_by_id', return_value=MockChat())
 
     response = client.post(url_for('api_chat_add_employee', chat_id=1))
 
-    mock_session.add.assert_not_called()
-    mock_session.commit.assert_not_called()
     assert response.status_code == 403
 
 
-def test_api_chat_add_entity_returns_200(client, mocker):
+def test_api_chat_add_entity_returns_200_on_successful_entity_creation(client, mocker):
     mock_session = mocker.patch('app.db.session')
     mocker.patch('app.current_user', MockEmployee())
     mocker.patch('app.Chat.get_chat_by_id', return_value=MockChat())
@@ -299,8 +297,8 @@ def test_api_chat_add_entity_returns_200(client, mocker):
 
 
 def test_api_chat_add_entity_returns_403_when_chat_is_not_assigned_to_employee(client, mocker):
-    mocker.patch('app.current_user', MockEmployee(id=2))
-    mocker.patch('app.Chat.get_chat_by_id', return_value=MockChat())
+    mocker.patch('app.current_user', MockEmployee())
+    mocker.patch('app.Chat.get_chat_by_id', return_value=MockChat(employee_id=None))
 
     response = client.post(
         url_for('api_chat_add_entity', chat_id=1),
@@ -314,7 +312,7 @@ def test_api_chat_add_entity_returns_403_when_chat_is_not_assigned_to_employee(c
     assert response.status_code == 403
 
 
-def test_api_chat_add_message_returns_200(client, config, mocker):
+def test_api_chat_add_message_returns_200_on_successful_message_creation(client, config, mocker):
     mock_send = mocker.patch('app.MessengerClient.send')
     mock_session = mocker.patch('app.db.session')
     mocker.patch('app.current_user', MockEmployee())
@@ -338,8 +336,8 @@ def test_api_chat_add_message_returns_200(client, config, mocker):
 
 
 def test_api_chat_add_message_returns_403_when_chat_is_not_assigned_to_employee(client, mocker):
-    mocker.patch('app.current_user', MockEmployee(id=2))
-    mocker.patch('app.Chat.get_chat_by_id', return_value=MockChat())
+    mocker.patch('app.current_user', MockEmployee())
+    mocker.patch('app.Chat.get_chat_by_id', return_value=MockChat(employee_id=None))
 
     response = client.post(
         url_for('api_chat_add_message', chat_id=1),
