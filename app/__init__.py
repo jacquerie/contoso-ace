@@ -6,12 +6,22 @@ from datetime import datetime
 from fbmessenger import MessengerClient
 from flask import Flask, current_app, jsonify, render_template, request
 from flask_bcrypt import Bcrypt
+from flask_login import (
+    LoginManager,
+    UserMixin,
+    current_user,
+    login_required,
+    login_user,
+    logout_user,
+)
 from flask_sqlalchemy import SQLAlchemy
 
 DAY = 24 * 60 * 60 * 1000
 
 
 class Config:
+    SECRET_KEY = os.getenv('SECRET_KEY')
+
     FACEBOOK_PAGE_TOKEN = os.getenv('FACEBOOK_PAGE_TOKEN')
     FACEBOOK_VERIFY_TOKEN = os.getenv('FACEBOOK_VERIFY_TOKEN')
 
@@ -24,6 +34,12 @@ app.config.from_object(Config)
 
 bcrypt = Bcrypt(app)
 db = SQLAlchemy(app)
+lm = LoginManager(app)
+
+
+@lm.user_loader
+def load_employee(employee_id):
+    return Employee.get_employee_by_id(int(employee_id))
 
 
 @app.route('/', methods=['GET'])
@@ -92,6 +108,7 @@ def webhook_post():
 
 
 @app.route('/api/chats', methods=['GET'])
+@login_required
 def api_chats():
     chats = Chat.get_unassigned_chats()
 
@@ -112,8 +129,11 @@ def api_chats():
 
 
 @app.route('/api/chats/<int:chat_id>', methods=['GET'])
+@login_required
 def api_chat_by_id(chat_id):
     chat = Chat.get_chat_by_id(chat_id)
+    if current_user.id != chat.employee_id:
+        return jsonify({'success': False}), 403
 
     return jsonify({
         '_id': chat.id,
@@ -140,7 +160,12 @@ def api_chat_by_id(chat_id):
 
 
 @app.route('/api/chats/<int:chat_id>/entities', methods=['POST'])
+@login_required
 def api_chat_add_entity(chat_id):
+    chat = Chat.get_chat_by_id(chat_id)
+    if current_user.id != chat.employee_id:
+        return jsonify({'success': False}), 403
+
     entity_data = request.get_json(force=True)
 
     entity = Entity(
@@ -160,13 +185,16 @@ def api_chat_add_entity(chat_id):
 
 
 @app.route('/api/chats/<int:chat_id>/messages', methods=['POST'])
+@login_required
 def api_chat_add_message(chat_id):
-    facebook_page_token = current_app.config['FACEBOOK_PAGE_TOKEN']
-    messenger_client = MessengerClient(facebook_page_token)
+    chat = Chat.get_chat_by_id(chat_id)
+    if current_user.id != chat.employee_id:
+        return jsonify({'success': False}), 403
 
     message_data = request.get_json(force=True)
 
-    chat = Chat.get_chat_by_id(chat_id)
+    facebook_page_token = current_app.config['FACEBOOK_PAGE_TOKEN']
+    messenger_client = MessengerClient(facebook_page_token)
     messenger_client.send(
         {'text': message_data['text']},
         {'sender': {'id': chat.customer.facebook_id}},
@@ -187,6 +215,26 @@ def api_chat_add_message(chat_id):
         'text': message.text,
         'timestamp': message.timestamp,
     }), 200
+
+
+@app.route('/api/employees/login', methods=['POST'])
+def api_employees_login():
+    employee_data = request.get_json(force=True)
+
+    employee = Employee.get_employee_by_email_and_password(
+        email=employee_data['email'], password=employee_data['password'])
+
+    if employee:
+        login_user(employee)
+        return jsonify({'success': True}), 200
+    return jsonify({'success': False}), 403
+
+
+@app.route('/api/employees/logout', methods=['POST'])
+@login_required
+def api_employees_logout():
+    logout_user()
+    return jsonify({'success': True}), 200
 
 
 class Message(db.Model):
@@ -245,7 +293,7 @@ class Customer(db.Model):
         return Customer.query.filter(Customer.facebook_id == facebook_id).one_or_none()
 
 
-class Employee(db.Model):
+class Employee(UserMixin, db.Model):
     id = db.Column(db.Integer(), primary_key=True)
     email = db.Column(db.String(), unique=True)
     password = db.Column(db.String())
@@ -255,4 +303,14 @@ class Employee(db.Model):
 
     def __init__(self, email, password):
         self.email = email
-        self.password = bcrypt.generate_password_hash(password)
+        self.password = bcrypt.generate_password_hash(password).decode('utf8')
+
+    @staticmethod
+    def get_employee_by_email_and_password(email, password):
+        employee = Employee.query.filter(Employee.email == email).one_or_none()
+        if employee and bcrypt.check_password_hash(employee.password, password):
+            return employee
+
+    @staticmethod
+    def get_employee_by_id(employee_id):
+        return Employee.query.filter(Employee.id == employee_id).one_or_none()

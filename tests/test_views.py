@@ -201,6 +201,7 @@ def test_api_chats_returns_200_and_the_unassigned_chats(client, mocker):
 
 
 def test_api_chat_by_id_returns_200_and_the_requested_chat(client, mocker):
+    mocker.patch('app.current_user', MockEmployee())
     mocker.patch('app.Chat.get_chat_by_id', return_value=MockChat(
         entities=[MockEntity()],
         messages=[
@@ -246,8 +247,19 @@ def test_api_chat_by_id_returns_200_and_the_requested_chat(client, mocker):
     assert expected == result
 
 
+def test_api_chat_by_id_returns_403_when_chat_is_not_assigned_to_employee(client, mocker):
+    mocker.patch('app.current_user', MockEmployee(id=2))
+    mocker.patch('app.Chat.get_chat_by_id', return_value=MockChat())
+
+    response = client.get(url_for('api_chat_by_id', chat_id=1))
+
+    assert response.status_code == 403
+
+
 def test_api_chat_add_entity_returns_200(client, mocker):
     mock_session = mocker.patch('app.db.session')
+    mocker.patch('app.current_user', MockEmployee())
+    mocker.patch('app.Chat.get_chat_by_id', return_value=MockChat())
 
     response = client.post(
         url_for('api_chat_add_entity', chat_id=1),
@@ -263,8 +275,25 @@ def test_api_chat_add_entity_returns_200(client, mocker):
     assert response.status_code == 200
 
 
+def test_api_chat_add_entity_returns_403_when_chat_is_not_assigned_to_employee(client, mocker):
+    mocker.patch('app.current_user', MockEmployee(id=2))
+    mocker.patch('app.Chat.get_chat_by_id', return_value=MockChat())
+
+    response = client.post(
+        url_for('api_chat_add_entity', chat_id=1),
+        content_type='application/json',
+        data=json.dumps({
+            'snippet': 'Paris',
+            'type': 'LOC',
+        }),
+    )
+
+    assert response.status_code == 403
+
+
 def test_api_chat_add_message_returns_200(client, config, mocker):
     mock_session = mocker.patch('app.db.session')
+    mocker.patch('app.current_user', MockEmployee())
     mocker.patch('app.Chat.get_chat_by_id', return_value=MockChat())
     mocker.patch.dict(config, {'FACEBOOK_PAGE_TOKEN': 'SECRET'})
 
@@ -276,4 +305,60 @@ def test_api_chat_add_message_returns_200(client, config, mocker):
 
     mock_session.add.assert_called_once()
     mock_session.commit.assert_called_once_with()
+    assert response.status_code == 200
+
+
+def test_api_chat_add_message_returns_403_when_chat_is_not_assigned_to_employee(client, mocker):
+    mocker.patch('app.current_user', MockEmployee(id=2))
+    mocker.patch('app.Chat.get_chat_by_id', return_value=MockChat())
+
+    response = client.post(
+        url_for('api_chat_add_message', chat_id=1),
+        content_type='application/json',
+        data=json.dumps({'text': 'Thanks! I hope so too.'}),
+    )
+
+    assert response.status_code == 403
+
+
+def test_api_employees_login_returns_200_on_successful_login(client, mocker):
+    mock_login_user = mocker.patch('app.login_user')
+    mocker.patch('app.Employee.get_employee_by_email_and_password', return_value=MockEmployee())
+
+    response = client.post(
+        url_for('api_employees_login'),
+        content_type='application/json',
+        data=json.dumps({
+            'email': 'barbara@contoso.com',
+            'password': 'password',
+        }),
+    )
+
+    mock_login_user.assert_called_once()
+    assert response.status_code == 200
+
+
+def test_api_employees_login_returns_403_on_failed_login(client, mocker):
+    mock_login_user = mocker.patch('app.login_user')
+    mocker.patch('app.Employee.get_employee_by_email_and_password', return_value=None)
+
+    response = client.post(
+        url_for('api_employees_login'),
+        content_type='application/json',
+        data=json.dumps({
+            'email': 'barbara@contoso.com',
+            'password': 'wrong password',
+        }),
+    )
+
+    mock_login_user.assert_not_called()
+    assert response.status_code == 403
+
+
+def test_api_employees_logout_returns_200_on_successful_logout(client, mocker):
+    mock_logout_user = mocker.patch('app.logout_user')
+
+    response = client.post(url_for('api_employees_logout'))
+
+    mock_logout_user.assert_called_once_with()
     assert response.status_code == 200
