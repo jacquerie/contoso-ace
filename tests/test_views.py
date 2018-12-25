@@ -292,6 +292,7 @@ def test_api_chat_add_entity_returns_403_when_chat_is_not_assigned_to_employee(c
 
 
 def test_api_chat_add_message_returns_200(client, config, mocker):
+    mock_send = mocker.patch('app.MessengerClient.send')
     mock_session = mocker.patch('app.db.session')
     mocker.patch('app.current_user', MockEmployee())
     mocker.patch('app.Chat.get_chat_by_id', return_value=MockChat())
@@ -303,6 +304,11 @@ def test_api_chat_add_message_returns_200(client, config, mocker):
         data=json.dumps({'text': 'Thanks! I hope so too.'}),
     )
 
+    mock_send.assert_called_once_with(
+        {'text': 'Thanks! I hope so too.'},
+        {'sender': {'id': '4'}},
+        'RESPONSE',
+    )
     mock_session.add.assert_called_once()
     mock_session.commit.assert_called_once_with()
     assert response.status_code == 200
