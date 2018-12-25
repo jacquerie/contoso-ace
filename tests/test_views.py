@@ -146,7 +146,7 @@ def test_webhook_post_modifies_the_current_chat_if_it_exists(client, config, moc
                     'messaging': [
                         {
                             'message': {
-                                'text': 'Good luck for Paris.',
+                                'text': 'I hope they like it in Paris.',
                             },
                             'sender': {
                                 'id': '4',
@@ -171,7 +171,8 @@ def test_api_chats_returns_200_and_the_unassigned_chats(client, mocker):
         MockChat(
             messages=[
                 MockMessage(),
-                MockMessage(id=2, text='Good luck for Paris.', timestamp=1545592340658),
+                MockMessage(
+                    id=2, text='I hope they like it in Paris.', timestamp=1545592340658),
             ],
         ),
     ])
@@ -204,7 +205,8 @@ def test_api_chat_by_id_returns_200_and_the_requested_chat(client, mocker):
         entities=[MockEntity()],
         messages=[
             MockMessage(),
-            MockMessage(id=2, text='Good luck for Paris.', timestamp=1545592340658),
+            MockMessage(
+                id=2, text='I hope they like it in Paris.', timestamp=1545592340658),
         ],
     ))
 
@@ -234,7 +236,7 @@ def test_api_chat_by_id_returns_200_and_the_requested_chat(client, mocker):
             },
             {
                 '_id': 2,
-                'text': 'Good luck for Paris.',
+                'text': 'I hope they like it in Paris.',
                 'timestamp': 1545592340658,
             },
         ],
@@ -269,7 +271,7 @@ def test_api_chat_add_message_returns_200(client, config, mocker):
     response = client.post(
         url_for('api_chat_add_message', chat_id=1),
         content_type='application/json',
-        data=json.dumps({'text': 'Thanks!'}),
+        data=json.dumps({'text': 'Thanks! I hope so too.'}),
     )
 
     mock_session.add.assert_called_once()
