@@ -100,28 +100,26 @@ def test_webhook_post_returns_200_and_handles_the_event(client, config, mocker):
     })
     mocker.patch.dict(config, {'FACEBOOK_PAGE_TOKEN': 'SECRET'})
 
-    webhook_event = {
-        'entry': [
-            {
-                'messaging': [
-                    {
-                        'message': {
-                            'text': 'Cool app!',
-                        },
-                        'sender': {
-                            'id': '4',
-                        },
-                        'timestamp': 1545592339658,
-                    },
-                ],
-            },
-        ],
-    }
-
     response = client.post(
         url_for('webhook_post'),
         content_type='application/json',
-        data=json.dumps(webhook_event),
+        data=json.dumps({
+            'entry': [
+                {
+                    'messaging': [
+                        {
+                            'message': {
+                                'text': 'Cool app!',
+                            },
+                            'sender': {
+                                'id': '4',
+                            },
+                            'timestamp': 1545592339658,
+                        },
+                    ],
+                },
+            ],
+        }),
     )
 
     assert mock_session.add.call_count == 3
@@ -139,28 +137,26 @@ def test_webhook_post_modifies_the_current_chat_if_it_exists(client, config, moc
         return_value=MockCustomer(chats=[MockChat()]))
     mocker.patch.dict(config, {'FACEBOOK_PAGE_TOKEN': 'SECRET'})
 
-    webhook_event = {
-        'entry': [
-            {
-                'messaging': [
-                    {
-                        'message': {
-                            'text': 'Good luck for Paris.',
-                        },
-                        'sender': {
-                            'id': '4',
-                        },
-                        'timestamp': 1545592340658,
-                    },
-                ],
-            },
-        ],
-    }
-
     response = client.post(
         url_for('webhook_post'),
         content_type='application/json',
-        data=json.dumps(webhook_event),
+        data=json.dumps({
+            'entry': [
+                {
+                    'messaging': [
+                        {
+                            'message': {
+                                'text': 'Good luck for Paris.',
+                            },
+                            'sender': {
+                                'id': '4',
+                            },
+                            'timestamp': 1545592340658,
+                        },
+                    ],
+                },
+            ],
+        }),
     )
 
     assert mock_session.add.call_count == 2
