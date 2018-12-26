@@ -297,7 +297,7 @@ class Chat(db.Model):
 
 class Customer(db.Model):
     id = db.Column(db.Integer(), primary_key=True)
-    facebook_id = db.Column(db.String(), unique=True)
+    facebook_id = db.Column(db.String(), nullable=False, unique=True)
     first_name = db.Column(db.String(), nullable=False)
     full_name = db.Column(db.String(), nullable=False)
     chats = db.relationship(
@@ -311,7 +311,7 @@ class Customer(db.Model):
 
 class Employee(UserMixin, db.Model):
     id = db.Column(db.Integer(), primary_key=True)
-    email = db.Column(db.String(), unique=True)
+    email = db.Column(db.String(), nullable=False, unique=True)
     password = db.Column(db.String())
     chats = db.relationship(
         'Chat', backref='employee', lazy='selectin',
