@@ -54,7 +54,7 @@ def webhook_get():
     if request.args.get('hub.mode') == 'subscribe':
         if request.args.get('hub.verify_token') == facebook_verify_token:
             return request.args.get('hub.challenge'), 200
-    return 'FACEBOOK_VERIFY_TOKEN does not match', 403
+    return 'KO', 403
 
 
 @app.route('/webhook', methods=['POST'])

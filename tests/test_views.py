@@ -90,7 +90,7 @@ def test_wehook_get_returns_403_on_failed_challenge(client, config, mocker):
     )
 
     assert response.status_code == 403
-    assert b'FACEBOOK_VERIFY_TOKEN' in response.data
+    assert b'KO' in response.data
 
 
 def test_webhook_post_returns_200_and_handles_the_event(client, config, mocker):
