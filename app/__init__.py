@@ -234,6 +234,45 @@ def api_chat_add_message(chat_id):
     }), 200
 
 
+@app.route('/api/chats/<int:chat_id>/predict', methods=['POST'])
+@login_required
+def api_chat_predict(chat_id):
+    chat = Chat.get_chat_by_id(chat_id)
+    if current_user.id != chat.employee_id:
+        return jsonify({'success': False}), 403
+
+    entity_model = EntityModel()
+    intent_model = IntentModel()
+
+    text = '\n'.join(
+        message.text for message in chat.messages if message.sender == 'customer')
+    entities = entity_model.predict(text)
+    intent = intent_model.predict(text)
+
+    db.session.add_all([
+        Entity(
+            chat_id=chat_id,
+            snippet=entity['snippet'],
+            type=entity['type'],
+        ) for entity in entities
+    ])
+    chat.intent = intent
+    db.session.add(chat)
+    db.session.commit()
+
+    return jsonify({
+        '_id': chat.id,
+        'entities': [
+            {
+                '_id': entity.id,
+                'snippet': entity.snippet,
+                'type': entity.type,
+            } for entity in chat.entities
+        ],
+        'intent': chat.intent,
+    }), 200
+
+
 @app.route('/api/employees/login', methods=['POST'])
 def api_employees_login():
     employee_data = request.get_json(force=True)
@@ -332,3 +371,26 @@ class Employee(UserMixin, db.Model):
     @staticmethod
     def get_employee_by_id(employee_id):
         return Employee.query.filter(Employee.id == employee_id).one_or_none()
+
+
+class EntityModel:
+    def predict(self, text):
+        return [
+            {
+                'snippet': 'Paris',
+                'type': 'LOC',
+            },
+            {
+                'snippet': 'next Monday',
+                'type': 'DATE',
+            },
+            {
+                'snippet': '1:30 local time',
+                'type': 'TIME',
+            },
+        ]
+
+
+class IntentModel:
+    def predict(self, text):
+        return 'CAR RENTAL'
