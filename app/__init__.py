@@ -218,6 +218,7 @@ def api_chat_add_message(chat_id):
 
     message = Message(
         chat_id=chat_id,
+        sender='employee',
         text=message_data['text'],
         timestamp=int(datetime.now().timestamp() * 1000)
     )
@@ -227,6 +228,7 @@ def api_chat_add_message(chat_id):
     return jsonify({
         '_id': message.id,
         'chat_id': message.chat_id,
+        'sender': 'employee',
         'text': message.text,
         'timestamp': message.timestamp,
     }), 200
