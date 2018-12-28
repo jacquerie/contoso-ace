@@ -32,9 +32,6 @@ before_install:
 install:
   - travis_retry pip install -r requirements-dev.txt
 
-before_script:
-  - python -c 'from app import db; db.create_all()'
-
 script:
   - ./run-tests.sh
 
