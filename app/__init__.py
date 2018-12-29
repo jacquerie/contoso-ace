@@ -4,7 +4,7 @@ import os
 
 from flask import Flask
 
-from .cli import db_cli
+from .cli import db_cli, employee_cli
 from .models import bcrypt, db, lm
 from .views import app as blueprint
 
@@ -23,6 +23,7 @@ app = Flask(__name__, template_folder='static')
 app.config.from_object(Config)
 
 app.cli.add_command(db_cli)
+app.cli.add_command(employee_cli)
 
 bcrypt.init_app(app)
 db.init_app(app)
