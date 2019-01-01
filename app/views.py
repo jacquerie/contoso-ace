@@ -37,7 +37,8 @@ class IntentModel:
 
 
 @app.route('/', methods=['GET'])
-def root():
+@app.route('/<path:path>', methods=['GET'])
+def root(path=None):
     return render_template('index.html'), 200
 
 
