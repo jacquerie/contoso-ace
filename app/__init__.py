@@ -19,7 +19,10 @@ class Config:
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
 
-app = Flask(__name__, template_folder='static')
+app = Flask(
+    __name__, template_folder=os.path.join('client', 'build'),
+    static_folder=os.path.join('client', 'build', 'static'),
+)
 app.config.from_object(Config)
 
 app.cli.add_command(db_cli)
