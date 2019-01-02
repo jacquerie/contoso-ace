@@ -1,3 +1,7 @@
 .Dashboard {
   margin-top: 5rem;
 }
+
+.Dashboard .row {
+  margin-bottom: 2.5rem;
+}
