@@ -1,3 +1,4 @@
+import PropTypes from 'prop-types';
 import React from 'react';
 import {
   Button,
@@ -19,6 +20,8 @@ class Dashboard extends React.Component {
     this.state = {
       chats: [],
     };
+
+    this.handleClick = this.handleClick.bind(this);
   }
 
   componentDidMount() {
@@ -59,10 +62,26 @@ class Dashboard extends React.Component {
           <CardBody>
             <CardTitle tag="h2">{chat.customer.full_name}</CardTitle>
             <CardText>{chat.message.text}</CardText>
-            <Button color="success">Accept</Button>
+            <Button onClick={() => this.handleClick(chat.message._id)}
+              color="success">
+              Accept
+            </Button>
           </CardBody>
         </Card>
       </Col>
+    )
+  }
+
+  handleClick(id) {
+    fetch(`/api/chats/${id}/employees`, {
+      method: 'POST',
+      credentials: 'same-origin',
+    }).then(
+      response => {
+        if (response.ok) {
+          this.context.router.history.push(`/chats/${id}`);
+        }
+      }
     )
   }
 
@@ -76,5 +95,9 @@ class Dashboard extends React.Component {
     );
   }
 }
+
+Dashboard.contextTypes = {
+  router: PropTypes.object.isRequired,
+};
 
 export default Dashboard;
