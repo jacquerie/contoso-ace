@@ -13,24 +13,64 @@ import {
 import './Dashboard.css'
 
 class Dashboard extends React.Component {
+  constructor(props) {
+    super(props);
+
+    this.state = {
+      chats: [],
+    };
+  }
+
+  componentDidMount() {
+    this.fetchChats();
+  }
+
+  fetchChats() {
+    fetch('/api/chats', {
+      'method': 'GET',
+      'credentials': 'same-origin',
+    }).then(
+      response => response.json()
+    ).then(
+      json => this.setState({chats: json})
+    )
+  }
+
+  toRows(chats) {
+    let rows = [];
+
+    for (let i = 0; i < chats.length; i = i + 3) {
+      let cols = [];
+
+      for (let j = i; j < chats.length && j < i + 3; j++) {
+        cols.push(this.toCol(chats[j]));
+      }
+
+      rows.push(<Row>{cols}</Row>);
+    }
+
+    return <div className="Rows">{rows}</div>;
+  }
+
+  toCol(chat) {
+    return (
+      <Col xs="4">
+        <Card>
+          <CardBody>
+            <CardTitle tag="h2">{chat.customer.full_name}</CardTitle>
+            <CardText>{chat.message.text}</CardText>
+            <Button color="success">Accept</Button>
+          </CardBody>
+        </Card>
+      </Col>
+    )
+  }
+
   render() {
     return (
       <div className="Dashboard">
         <Container>
-          <Row>
-            <Col xs="4">
-              <Card>
-                <CardBody>
-                  <CardTitle tag="h2">Jane Doe</CardTitle>
-                  <CardText>
-                    Hi, I've got a trip to Paris next Monday
-                    and I'd like to rent a car there.
-                  </CardText>
-                  <Button color="success">Accept</Button>
-                </CardBody>
-              </Card>
-            </Col>
-          </Row>
+          {this.toRows(this.state.chats)}
         </Container>
       </div>
     );
