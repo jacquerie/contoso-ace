@@ -1,3 +1,4 @@
+import PropTypes from 'prop-types';
 import React from 'react';
 import { Container, Nav, NavItem, NavLink, Navbar } from 'reactstrap';
 
@@ -39,6 +40,8 @@ class Header extends React.Component {
       response => response.ok ? null : this.state.employee
     ).then(
       json => this.setState({employee: json})
+    ).then(
+      () => this.context.router.history.push('/')
     )
   }
 
@@ -66,5 +69,9 @@ class Header extends React.Component {
     );
   }
 }
+
+Header.contextTypes = {
+  router: PropTypes.object.isRequired,
+};
 
 export default Header;

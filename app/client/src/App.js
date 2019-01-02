@@ -9,9 +9,9 @@ class App extends React.Component {
   render() {
     return (
       <div className="App">
-        <Header />
         <Router>
           <div className="Router">
+            <Header />
             <Route path="/" exact component={Login} />
             <Route path="/chats" component={Chats} />
           </div>
