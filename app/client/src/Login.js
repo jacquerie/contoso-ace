@@ -1,3 +1,4 @@
+import PropTypes from 'prop-types';
 import React from 'react';
 import {
   Button,
@@ -15,6 +16,33 @@ import {
 import './Login.css';
 
 class Login extends React.Component {
+  constructor(props) {
+    super(props);
+
+    this.handleSubmit = this.handleSubmit.bind(this);
+  }
+
+  handleSubmit(event) {
+    event.preventDefault();
+
+    const formData = new FormData(event.target);
+
+    fetch('/api/employees/login', {
+      method: 'POST',
+      credentials: 'same-origin',
+      body: JSON.stringify({
+        'email': formData.get('Email'),
+        'password': formData.get('Password'),
+      }),
+    }).then(
+      (response) => {
+        if (response.ok) {
+          this.context.router.history.push('/chats');
+        }
+      }
+    );
+  }
+
   render() {
     return (
       <div className="Login">
@@ -23,7 +51,7 @@ class Login extends React.Component {
             <Col xs={{ offset: 3, size: 6 }}>
               <Card>
                 <CardBody>
-                  <Form>
+                  <Form onSubmit={this.handleSubmit}>
                     <FormGroup>
                       <Label for="Email">Email</Label>
                       <Input
@@ -35,7 +63,7 @@ class Login extends React.Component {
                       <Label for="Password">Password</Label>
                       <Input type="password" name="Password" id="Password" />
                     </FormGroup>
-                    <Button color="primary">Sign In</Button>
+                    <Button type="submit" color="primary">Sign In</Button>
                   </Form>
                 </CardBody>
               </Card>
@@ -46,5 +74,9 @@ class Login extends React.Component {
     );
   }
 }
+
+Login.contextTypes = {
+  router: PropTypes.object.isRequired,
+};
 
 export default Login;
