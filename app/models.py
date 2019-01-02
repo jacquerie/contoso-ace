@@ -74,6 +74,7 @@ class Customer(db.Model):
 class Employee(UserMixin, db.Model):
     id = db.Column(db.Integer(), primary_key=True)
     email = db.Column(db.String(), nullable=False, unique=True)
+    first_name = db.Column(db.String(), nullable=False)
     password = db.Column(db.String())
     chats = db.relationship(
         'Chat', backref='employee', lazy='selectin',
@@ -81,6 +82,7 @@ class Employee(UserMixin, db.Model):
 
     def __init__(self, email, password):
         self.email = email
+        self.first_name = email.split('@')[0].capitalize()
         self.password = bcrypt.generate_password_hash(password).decode('utf8')
 
     @staticmethod

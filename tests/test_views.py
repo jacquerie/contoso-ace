@@ -11,6 +11,7 @@ from flask import url_for
 class MockEmployee:
     id = attr.ib(default=1)
     email = attr.ib(default='barbara@contoso.com')
+    first_name = attr.ib(default='Barbara')
     password = attr.ib(default='password')
     chats = attr.ib(factory=list)
 
@@ -382,6 +383,7 @@ def test_api_employees_current_returns_200_when_employee_is_logged_in(client, mo
     expected = {
         '_id': 1,
         'email': 'barbara@contoso.com',
+        'first_name': 'Barbara',
     }
     result = json.loads(response.data)
 
