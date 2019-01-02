@@ -30,7 +30,7 @@ class Dashboard extends React.Component {
       'method': 'GET',
       'credentials': 'same-origin',
     }).then(
-      response => response.json()
+      response => response.ok ? response.json() : []
     ).then(
       json => this.setState({chats: json})
     )
