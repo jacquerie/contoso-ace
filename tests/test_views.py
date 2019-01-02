@@ -372,6 +372,22 @@ def test_api_chat_predict_returns_403_when_chat_is_not_assigned_to_employee(clie
     assert response.status_code == 403
 
 
+def test_api_employees_current_returns_200_when_employee_is_logged_in(client, mocker):
+    mocker.patch('app.views.current_user', MockEmployee())
+
+    response = client.get(url_for('app.api_employees_current'))
+
+    assert response.status_code == 200
+
+    expected = {
+        '_id': 1,
+        'email': 'barbara@contoso.com',
+    }
+    result = json.loads(response.data)
+
+    assert expected == result
+
+
 def test_api_employees_login_returns_200_on_successful_login(client, mocker):
     mock_login_user = mocker.patch('app.views.login_user')
     mocker.patch('app.views.Employee.get_employee_by_email_and_password', return_value=MockEmployee())

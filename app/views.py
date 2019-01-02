@@ -268,6 +268,15 @@ def api_chat_predict(chat_id):
     }), 200
 
 
+@app.route('/api/employees/current', methods=['GET'])
+@login_required
+def api_employees_current():
+    return jsonify({
+        '_id': current_user.id,
+        'email': current_user.email,
+    })
+
+
 @app.route('/api/employees/login', methods=['POST'])
 def api_employees_login():
     employee_data = request.get_json(force=True)
