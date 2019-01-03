@@ -148,6 +148,7 @@ def api_chat_by_id(chat_id):
         'messages': [
             {
                 '_id': message.id,
+                'sender': message.sender,
                 'text': message.text,
                 'timestamp': message.timestamp,
             } for message in chat.messages

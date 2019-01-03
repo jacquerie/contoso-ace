@@ -210,7 +210,11 @@ def test_api_chat_by_id_returns_200_and_the_requested_chat(client, mocker):
         messages=[
             MockMessage(),
             MockMessage(
-                id=2, text='I hope they like it in Paris.', timestamp=1545592340658),
+                id=2,
+                sender='customer',
+                text='I hope they like it in Paris.',
+                timestamp=1545592340658,
+            ),
         ],
     ))
 
@@ -236,11 +240,13 @@ def test_api_chat_by_id_returns_200_and_the_requested_chat(client, mocker):
         'messages': [
             {
                 '_id': 1,
+                'sender': 'customer',
                 'text': 'Cool app!',
                 'timestamp': 1545592339658,
             },
             {
                 '_id': 2,
+                'sender': 'customer',
                 'text': 'I hope they like it in Paris.',
                 'timestamp': 1545592340658,
             },
