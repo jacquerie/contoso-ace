@@ -203,6 +203,8 @@ def api_chat_add_message(chat_id):
         return jsonify({'success': False}), 403
 
     message_data = request.get_json(force=True)
+    if not message_data['text']:
+        return jsonify({'success': False}), 422
 
     facebook_page_token = current_app.config['FACEBOOK_PAGE_TOKEN']
     messenger_client = MessengerClient(facebook_page_token)

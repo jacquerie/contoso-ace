@@ -357,6 +357,19 @@ def test_api_chat_add_message_returns_403_when_chat_is_not_assigned_to_employee(
     assert response.status_code == 403
 
 
+def test_api_chat_add_message_returns_422_when_message_text_is_empty(client, mocker):
+    mocker.patch('app.views.current_user', MockEmployee())
+    mocker.patch('app.views.Chat.get_chat_by_id', return_value=MockChat())
+
+    response = client.post(
+        url_for('app.api_chat_add_message', chat_id=1),
+        content_type='application/json',
+        data=json.dumps({'text': ''}),
+    )
+
+    assert response.status_code == 422
+
+
 def test_api_chat_predict_returns_200_on_successful_prediction(client, mocker):
     mock_session = mocker.patch('app.db.session')
     mocker.patch('app.views.current_user', MockEmployee())
