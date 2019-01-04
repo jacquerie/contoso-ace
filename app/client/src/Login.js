@@ -19,17 +19,30 @@ class Login extends React.Component {
   constructor(props) {
     super(props);
 
+    this.state = {
+      email: '',
+      password: '',
+    };
+
+    this.handleEmailChange = this.handleEmailChange.bind(this);
+    this.handlePasswordChange = this.handlePasswordChange.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
+  }
+
+  handleEmailChange(event) {
+    this.setState({email: event.target.value});
+  }
+
+  handlePasswordChange(event) {
+    this.setState({password: event.target.value});
   }
 
   handleSubmit(event) {
     event.preventDefault();
 
-    const formData = new FormData(event.target);
-
     this.props.loginEmployee(
-      formData.get('Email'),
-      formData.get('Password'),
+      this.state.email,
+      this.state.password,
     ).then(
       () => this.context.router.history.push('/chats')
     );
@@ -49,11 +62,14 @@ class Login extends React.Component {
                       <Input
                         type="email" name="Email" id="Email"
                         placeholder="barbara@contoso.com"
+                        onChange={this.handleEmailChange}
                       />
                     </FormGroup>
                     <FormGroup>
                       <Label for="Password">Password</Label>
-                      <Input type="password" name="Password" id="Password" />
+                      <Input type="password" name="Password" id="Password"
+                        onChange={this.handlePasswordChange}
+                      />
                     </FormGroup>
                     <Button type="submit" color="primary">Sign In</Button>
                   </Form>
