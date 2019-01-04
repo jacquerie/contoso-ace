@@ -27,7 +27,11 @@ class Chat extends React.Component {
   }
 
   componentDidMount() {
-    this.fetchChat(this.state._id);
+    this.timer = setInterval(() => this.fetchChat(this.state._id), 1000);
+  }
+
+  componentWillUnmount() {
+    clearInterval(this.timer);
   }
 
   fetchChat(id) {
