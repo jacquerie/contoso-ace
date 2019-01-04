@@ -11,9 +11,7 @@ class Header extends React.Component {
     this.handleClick = this.handleClick.bind(this);
   }
 
-  handleClick(event) {
-    event.preventDefault();
-
+  handleClick() {
     this.props.logoutEmployee().then(
       () => this.context.router.history.push('/')
     );

@@ -237,14 +237,10 @@ class Footer extends React.Component {
   }
 
   handleSendChange(event) {
-    event.preventDefault();
-
     this.setState({text: event.target.value});
   }
 
   handleSendClick(event) {
-    event.preventDefault();
-
     this.props.send(this.state.text).then(
       () => this.setState({text: ''})
     );
@@ -259,8 +255,6 @@ class Footer extends React.Component {
   }
 
   handlePredictClick(event) {
-    event.preventDefault();
-
     this.props.predict();
   }
 
