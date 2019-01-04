@@ -25,7 +25,11 @@ class Dashboard extends React.Component {
   }
 
   componentDidMount() {
-    this.fetchChats();
+    this.timer = setInterval(() => this.fetchChats(), 1000);
+  }
+
+  componentWillUnmount() {
+    clearInterval(this.timer);
   }
 
   fetchChats() {
