@@ -139,7 +139,7 @@ function Message(props) {
 function Predictions(props) {
   return (
     <div className="Predictions">
-      <Intent intent={props.intent} />
+      {props.intent !== null && <Intent intent={props.intent} />}
       <Entities entities={props.entities} />
     </div>
   );
