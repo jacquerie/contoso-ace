@@ -1,0 +1,11 @@
+.Chat {
+  margin-top: 5rem;
+}
+
+.Chat .Message {
+  margin-bottom: 1.25rem;
+}
+
+.Chat .Intent {
+  margin-bottom: 2.5rem;
+}
