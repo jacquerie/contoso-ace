@@ -151,7 +151,10 @@ function Message(props) {
             />
           </Col>
           <Col xs="8">
-            <Card body outline color="primary">
+            <Card body style={{
+              backgroundColor: "rgba(0, 123, 255, 0.1)",
+              borderColor: "rgba(0, 123, 255)",
+            }}>
               <CardText>{props.message.text}</CardText>
             </Card>
           </Col>
