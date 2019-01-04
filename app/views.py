@@ -276,7 +276,7 @@ def api_employees_current():
         '_id': current_user.id,
         'email': current_user.email,
         'first_name': current_user.first_name,
-    })
+    }), 200
 
 
 @app.route('/api/employees/login', methods=['POST'])
