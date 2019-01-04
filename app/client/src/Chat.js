@@ -232,6 +232,7 @@ class Footer extends React.Component {
 
     this.handleSendChange = this.handleSendChange.bind(this);
     this.handleSendClick = this.handleSendClick.bind(this);
+    this.handleSendKeyPress = this.handleSendKeyPress.bind(this);
     this.handlePredictClick = this.handlePredictClick.bind(this);
   }
 
@@ -249,6 +250,14 @@ class Footer extends React.Component {
     );
   }
 
+  handleSendKeyPress(event) {
+    if (event.key === 'Enter') {
+      this.props.send(this.state.text).then(
+        () => this.setState({'text': ''})
+      );
+    }
+  }
+
   handlePredictClick(event) {
     event.preventDefault();
 
@@ -264,6 +273,7 @@ class Footer extends React.Component {
               <Input
                 type="text" value={this.state.text}
                 onChange={this.handleSendChange}
+                onKeyPress={this.handleSendKeyPress}
               />
               <InputGroupAddon addonType="append">
                 <Button color="success" onClick={this.handleSendClick}>
