@@ -8,41 +8,15 @@ class Header extends React.Component {
   constructor(props) {
     super(props);
 
-    this.state = {
-      employee: null,
-    };
-
     this.handleClick = this.handleClick.bind(this);
-  }
-
-  componentDidMount() {
-    this.fetchEmployee();
-  }
-
-  fetchEmployee() {
-    fetch('/api/employees/current', {
-      'method': 'GET',
-      'credentials': 'same-origin',
-    }).then(
-      response => response.ok ? response.json() : null
-    ).then(
-      json => this.setState({employee: json})
-    )
   }
 
   handleClick(event) {
     event.preventDefault();
 
-    fetch('/api/employees/logout', {
-      'method': 'POST',
-      'credentials': 'same-origin',
-    }).then(
-      response => response.ok ? null : this.state.employee
-    ).then(
-      json => this.setState({employee: json})
-    ).then(
+    this.props.logoutEmployee().then(
       () => this.context.router.history.push('/')
-    )
+    );
   }
 
   render() {
@@ -51,10 +25,10 @@ class Header extends React.Component {
         <Navbar dark color="primary" expand="xs">
           <Container>
             <h1 className="navbar-text">Contoso ACE</h1>
-            {this.state.employee !== null &&
+            {this.props.employee !== null &&
               <Nav navbar>
                 <NavItem className="navbar-text mr-3">
-                  Hello, {this.state.employee.first_name}!
+                  Hello, {this.props.employee.first_name}!
                 </NavItem>
                 <NavItem>
                   <NavLink onClick={this.handleClick}>

@@ -27,19 +27,11 @@ class Login extends React.Component {
 
     const formData = new FormData(event.target);
 
-    fetch('/api/employees/login', {
-      method: 'POST',
-      credentials: 'same-origin',
-      body: JSON.stringify({
-        'email': formData.get('Email'),
-        'password': formData.get('Password'),
-      }),
-    }).then(
-      (response) => {
-        if (response.ok) {
-          this.context.router.history.push('/chats');
-        }
-      }
+    this.props.loginEmployee(
+      formData.get('Email'),
+      formData.get('Password'),
+    ).then(
+      () => this.context.router.history.push('/chats')
     );
   }
 
