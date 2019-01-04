@@ -186,7 +186,7 @@ function Predictions(props) {
   return (
     <div className="Predictions">
       {props.intent !== null && <Intent intent={props.intent} />}
-      <Entities entities={props.entities} />
+      {props.entities.length > 0 && <Entities entities={props.entities} />}
     </div>
   );
 }
