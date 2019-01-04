@@ -245,6 +245,8 @@ def api_chat_predict(chat_id):
     entities = entity_model.predict(text)
     intent = intent_model.predict(text)
 
+    for entity in chat.entities:
+        db.session.delete(entity)
     db.session.add_all([
         Entity(
             chat_id=chat_id,

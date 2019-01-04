@@ -2,12 +2,17 @@ import React from 'react';
 import Timestamp from 'react-timestamp';
 import {
   Badge,
+  Button,
   Card,
   CardText,
   Col,
   Container,
+  Input,
+  InputGroup,
+  InputGroupAddon,
   ListGroup,
   ListGroupItem,
+  Navbar,
   Row,
 } from 'reactstrap';
 
@@ -24,23 +29,27 @@ class Chat extends React.Component {
       intent: null,
       messages: [],
     };
+
+    this.fetchChat = this.fetchChat.bind(this);
+    this.send = this.send.bind(this);
+    this.predict = this.predict.bind(this);
   }
 
   componentDidMount() {
-    this.timer = setInterval(() => this.fetchChat(this.state._id), 1000);
+    this.timer = setInterval(() => this.fetchChat(), 1000);
   }
 
   componentWillUnmount() {
     clearInterval(this.timer);
   }
 
-  fetchChat(id) {
-    return fetch(`/api/chats/${id}`, {
+  fetchChat() {
+    return fetch(`/api/chats/${this.state._id}`, {
       method: 'GET',
       credentials: 'same-origin',
     }).then(
       response => response.ok ? response.json() : {
-        _id: id,
+        _id: this.state._id,
         customer: {},
         entities: [],
         intent: null,
@@ -53,6 +62,39 @@ class Chat extends React.Component {
         entities: json.entities,
         intent: json.intent,
         messages: json.messages,
+      })
+    );
+  }
+
+  send(text) {
+    return fetch(`/api/chats/${this.state._id}/messages`, {
+      method: 'POST',
+      credentials: 'same-origin',
+      body: JSON.stringify({text: text}),
+    }).then(
+      response => {
+        if (response.ok) {
+          this.setState({
+            messages: this.state.messages.concat(response.json()),
+          });
+        }
+      }
+    );
+  }
+
+  predict() {
+    return fetch(`/api/chats/${this.state._id}/predict`, {
+      method: 'POST',
+      credentials: 'same-origin',
+    }).then(
+      response => response.ok ? response.json() : {
+        entities: this.state.entities,
+        intent: this.state.intent,
+      }
+    ).then(
+      json => this.setState({
+        entities: json.entities,
+        intent: json.intent,
       })
     );
   }
@@ -76,6 +118,10 @@ class Chat extends React.Component {
             </Col>
           </Row>
         </Container>
+        <Footer
+          send={this.send}
+          predict={this.predict}
+        />
       </div>
     );
   }
@@ -174,6 +220,65 @@ function Entities(props) {
       <ListGroup>{entities}</ListGroup>
     </div>
   );
+}
+
+class Footer extends React.Component {
+  constructor(props) {
+    super(props);
+
+    this.state = {
+      text: '',
+    }
+
+    this.handleSendChange = this.handleSendChange.bind(this);
+    this.handleSendClick = this.handleSendClick.bind(this);
+    this.handlePredictClick = this.handlePredictClick.bind(this);
+  }
+
+  handleSendChange(event) {
+    event.preventDefault();
+
+    this.setState({text: event.target.value});
+  }
+
+  handleSendClick(event) {
+    event.preventDefault();
+
+    this.props.send(this.state.text).then(
+      () => this.setState({text: ''})
+    );
+  }
+
+  handlePredictClick(event) {
+    event.preventDefault();
+
+    this.props.predict();
+  }
+
+  render() {
+    return (
+      <div className="Footer">
+        <Navbar dark color="primary" expand="xs" fixed="bottom">
+          <Container>
+            <InputGroup size="lg" className="mr-3">
+              <Input
+                type="text" value={this.state.text}
+                onChange={this.handleSendChange}
+              />
+              <InputGroupAddon addonType="append">
+                <Button color="success" onClick={this.handleSendClick}>
+                  Send
+                </Button>
+              </InputGroupAddon>
+            </InputGroup>
+            <Button color="danger" size="lg" onClick={this.handlePredictClick}>
+              Predict
+            </Button>
+          </Container>
+        </Navbar>
+      </div>
+    );
+  }
 }
 
 export default Chat;
