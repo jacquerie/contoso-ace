@@ -66,7 +66,7 @@ class Dashboard extends React.Component {
           <CardBody>
             <CardTitle tag="h2">{chat.customer.full_name}</CardTitle>
             <CardText>{chat.message.text}</CardText>
-            <Button onClick={() => this.handleClick(chat.message._id)}
+            <Button onClick={() => this.handleClick(chat._id)}
               color="success">
               Accept
             </Button>
