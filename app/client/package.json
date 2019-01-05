@@ -1,6 +1,6 @@
 {
   "name": "contoso-ace",
-  "version": "0.13.8",
+  "version": "0.13.9",
   "private": true,
   "dependencies": {
     "bootstrap": "^4.2.1",

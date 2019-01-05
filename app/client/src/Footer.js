@@ -8,6 +8,8 @@ import {
   Navbar,
 } from 'reactstrap';
 
+import './Footer.css';
+
 class Footer extends React.Component {
   constructor(props) {
     super(props);
