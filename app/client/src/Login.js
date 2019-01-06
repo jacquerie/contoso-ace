@@ -3,7 +3,6 @@ import React from 'react';
 import {
   Button,
   Card,
-  CardBody,
   Col,
   Container,
   Form,
@@ -54,26 +53,24 @@ class Login extends React.Component {
         <Container>
           <Row>
             <Col xs={{ offset: 3, size: 6 }}>
-              <Card>
-                <CardBody>
-                  <Form onSubmit={this.handleSubmit}>
-                    <FormGroup>
-                      <Label for="Email">Email</Label>
-                      <Input
-                        type="email" name="Email" id="Email"
-                        placeholder="barbara@contoso.com"
-                        onChange={this.handleEmailChange}
-                      />
-                    </FormGroup>
-                    <FormGroup>
-                      <Label for="Password">Password</Label>
-                      <Input type="password" name="Password" id="Password"
-                        onChange={this.handlePasswordChange}
-                      />
-                    </FormGroup>
-                    <Button type="submit" color="primary">Sign In</Button>
-                  </Form>
-                </CardBody>
+              <Card body>
+                <Form onSubmit={this.handleSubmit}>
+                  <FormGroup>
+                    <Label for="Email">Email</Label>
+                    <Input
+                      type="email" name="Email" id="Email"
+                      placeholder="barbara@contoso.com"
+                      onChange={this.handleEmailChange}
+                    />
+                  </FormGroup>
+                  <FormGroup>
+                    <Label for="Password">Password</Label>
+                    <Input type="password" name="Password" id="Password"
+                      onChange={this.handlePasswordChange}
+                    />
+                  </FormGroup>
+                  <Button type="submit" color="primary">Sign In</Button>
+                </Form>
               </Card>
             </Col>
           </Row>

@@ -3,7 +3,6 @@ import React from 'react';
 import {
   Button,
   Card,
-  CardBody,
   CardText,
   CardTitle,
   Col,
@@ -62,15 +61,13 @@ class Dashboard extends React.Component {
   toCol(chat) {
     return (
       <Col xs="4">
-        <Card>
-          <CardBody>
-            <CardTitle tag="h2">{chat.customer.full_name}</CardTitle>
-            <CardText>{chat.message.text}</CardText>
-            <Button onClick={() => this.handleClick(chat._id)}
-              color="success">
-              Accept
-            </Button>
-          </CardBody>
+        <Card body>
+          <CardTitle tag="h2">{chat.customer.full_name}</CardTitle>
+          <CardText>{chat.message.text}</CardText>
+          <Button onClick={() => this.handleClick(chat._id)}
+            color="success">
+            Accept
+          </Button>
         </Card>
       </Col>
     )
