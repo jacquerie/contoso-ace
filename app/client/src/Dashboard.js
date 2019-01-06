@@ -11,7 +11,7 @@ import {
   Row,
 } from 'reactstrap';
 
-import './Dashboard.css'
+import './Dashboard.css';
 
 class Dashboard extends React.Component {
   constructor(props) {
@@ -35,15 +35,12 @@ class Dashboard extends React.Component {
 
   fetchChats() {
     fetch('/api/chats', {
-      'method': 'GET',
-      'credentials': 'same-origin',
-    }).then(
-      response => response.ok ? response.json() : []
-    ).then(
-      json => this.setState({chats: json})
-    ).then(
-      () => this.setState({loading: false})
-    );
+      method: 'GET',
+      credentials: 'same-origin',
+    })
+      .then(response => (response.ok ? response.json() : []))
+      .then(json => this.setState({ chats: json }))
+      .then(() => this.setState({ loading: false }));
   }
 
   toRows(chats) {
@@ -68,26 +65,23 @@ class Dashboard extends React.Component {
         <Card body>
           <CardTitle tag="h2">{chat.customer.full_name}</CardTitle>
           <CardText>{chat.message.text}</CardText>
-          <Button onClick={() => this.handleClick(chat._id)}
-            color="success">
+          <Button onClick={() => this.handleClick(chat._id)} color="success">
             Accept
           </Button>
         </Card>
       </Col>
-    )
+    );
   }
 
   handleClick(id) {
     fetch(`/api/chats/${id}/employees`, {
       method: 'POST',
       credentials: 'same-origin',
-    }).then(
-      response => {
-        if (response.ok) {
-          this.context.router.history.push(`/chats/${id}`);
-        }
+    }).then(response => {
+      if (response.ok) {
+        this.context.router.history.push(`/chats/${id}`);
       }
-    )
+    });
   }
 
   render() {

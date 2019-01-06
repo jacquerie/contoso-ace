@@ -25,11 +25,9 @@ class App extends React.Component {
     return fetch('/api/employees/current', {
       method: 'GET',
       credentials: 'same-origin',
-    }).then(
-      response => response.ok ? response.json() : null
-    ).then(
-      json => this.setState({employee: json})
-    );
+    })
+      .then(response => (response.ok ? response.json() : null))
+      .then(json => this.setState({ employee: json }));
   }
 
   loginEmployee(email, password) {
@@ -40,24 +38,20 @@ class App extends React.Component {
         email: email,
         password: password,
       }),
-    }).then(
-      response => {
-        if (response.ok) {
-          this.fetchEmployee();
-        }
+    }).then(response => {
+      if (response.ok) {
+        this.fetchEmployee();
       }
-    );
+    });
   }
 
   logoutEmployee() {
     return fetch('/api/employees/logout', {
       method: 'POST',
       credentials: 'same-origin',
-    }).then(
-      response => response.ok ? null : this.state.employee
-    ).then(
-      json => this.setState({employee: json})
-    );
+    })
+      .then(response => (response.ok ? null : this.state.employee))
+      .then(json => this.setState({ employee: json }));
   }
 
   render() {
@@ -70,13 +64,11 @@ class App extends React.Component {
               logoutEmployee={this.logoutEmployee}
             />
             <Route
-              path="/" exact
-              render={
-                props => <Login
-                           {...props}
-                           loginEmployee={this.loginEmployee}
-                         />
-              }
+              path="/"
+              exact
+              render={props => (
+                <Login {...props} loginEmployee={this.loginEmployee} />
+              )}
             />
             <Route path="/chats" component={Chats} />
           </div>

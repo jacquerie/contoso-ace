@@ -46,58 +46,63 @@ class Chat extends React.Component {
     return fetch(`/api/chats/${this.state._id}`, {
       method: 'GET',
       credentials: 'same-origin',
-    }).then(
-      response => response.ok ? response.json() : {
-        _id: this.state._id,
-        customer: {},
-        entities: [],
-        intent: null,
-        messages: [],
-      }
-    ).then(
-      json => this.setState({
-        _id: json._id,
-        customer: json.customer,
-        entities: json.entities,
-        intent: json.intent,
-        messages: json.messages,
-      })
-    ).then(
-      () => this.setState({loading: false})
-    );
+    })
+      .then(response =>
+        response.ok
+          ? response.json()
+          : {
+              _id: this.state._id,
+              customer: {},
+              entities: [],
+              intent: null,
+              messages: [],
+            }
+      )
+      .then(json =>
+        this.setState({
+          _id: json._id,
+          customer: json.customer,
+          entities: json.entities,
+          intent: json.intent,
+          messages: json.messages,
+        })
+      )
+      .then(() => this.setState({ loading: false }));
   }
 
   send(text) {
     return fetch(`/api/chats/${this.state._id}/messages`, {
       method: 'POST',
       credentials: 'same-origin',
-      body: JSON.stringify({text: text}),
-    }).then(
-      response => {
-        if (response.ok) {
-          this.setState({
-            messages: this.state.messages.concat(response.json()),
-          });
-        }
+      body: JSON.stringify({ text: text }),
+    }).then(response => {
+      if (response.ok) {
+        this.setState({
+          messages: this.state.messages.concat(response.json()),
+        });
       }
-    );
+    });
   }
 
   predict() {
     return fetch(`/api/chats/${this.state._id}/predict`, {
       method: 'POST',
       credentials: 'same-origin',
-    }).then(
-      response => response.ok ? response.json() : {
-        entities: this.state.entities,
-        intent: this.state.intent,
-      }
-    ).then(
-      json => this.setState({
-        entities: json.entities,
-        intent: json.intent,
-      })
-    );
+    })
+      .then(response =>
+        response.ok
+          ? response.json()
+          : {
+              entities: this.state.entities,
+              intent: this.state.intent,
+            }
+      )
+      .then(json =>
+        this.setState({
+          entities: json.entities,
+          intent: json.intent,
+        })
+      );
   }
 
   render() {
@@ -125,10 +130,7 @@ class Chat extends React.Component {
             </Row>
           )}
         </Container>
-        <Footer
-          send={this.send}
-          predict={this.predict}
-        />
+        <Footer send={this.send} predict={this.predict} />
       </div>
     );
   }
@@ -139,10 +141,7 @@ function Messages(props) {
 
   for (let i = 0; i < props.messages.length; i++) {
     messages.push(
-      <Message
-        customer={props.customer}
-        message={props.messages[i]}
-      />
+      <Message customer={props.customer} message={props.messages[i]} />
     );
   }
 
@@ -155,23 +154,25 @@ function Message(props) {
       <div className="Message">
         <Row className="align-items-center h-100">
           <Col xs="4" className="text-center">
-            <strong>{props.customer.first_name}</strong><br />
-            <Timestamp
-              time={props.message.timestamp / 1000} format='time'
-            />
+            <strong>{props.customer.first_name}</strong>
+            <br />
+            <Timestamp time={props.message.timestamp / 1000} format="time" />
           </Col>
           <Col xs="8">
-            <Card body style={{
-              backgroundColor: "rgba(0, 123, 255, 0.1)",
-              borderColor: "rgba(0, 123, 255)",
-            }}>
+            <Card
+              body
+              style={{
+                backgroundColor: 'rgba(0, 123, 255, 0.1)',
+                borderColor: 'rgba(0, 123, 255)',
+              }}
+            >
               <CardText>{props.message.text}</CardText>
             </Card>
           </Col>
         </Row>
       </div>
     );
- } else {
+  } else {
     return (
       <div className="Message">
         <Row className="align-items-center h-100">
@@ -181,15 +182,14 @@ function Message(props) {
             </Card>
           </Col>
           <Col xs="4" className="text-center">
-            <strong>You</strong><br />
-            <Timestamp
-              time={props.message.timestamp / 1000} format='time'
-            />
+            <strong>You</strong>
+            <br />
+            <Timestamp time={props.message.timestamp / 1000} format="time" />
           </Col>
         </Row>
       </div>
     );
- }
+  }
 }
 
 function Predictions(props) {
@@ -218,7 +218,9 @@ function Entities(props) {
   for (let i = 0; i < props.entities.length; i++) {
     entities.push(
       <ListGroupItem>
-        <Badge color="primary" pill>{props.entities[i].type}</Badge>
+        <Badge color="primary" pill>
+          {props.entities[i].type}
+        </Badge>
         <span className="float-right">"{props.entities[i].snippet}"</span>
       </ListGroupItem>
     );

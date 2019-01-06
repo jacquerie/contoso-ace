@@ -29,22 +29,19 @@ class Login extends React.Component {
   }
 
   handleEmailChange(event) {
-    this.setState({email: event.target.value});
+    this.setState({ email: event.target.value });
   }
 
   handlePasswordChange(event) {
-    this.setState({password: event.target.value});
+    this.setState({ password: event.target.value });
   }
 
   handleSubmit(event) {
     event.preventDefault();
 
-    this.props.loginEmployee(
-      this.state.email,
-      this.state.password,
-    ).then(
-      () => this.context.router.history.push('/chats')
-    );
+    this.props
+      .loginEmployee(this.state.email, this.state.password)
+      .then(() => this.context.router.history.push('/chats'));
   }
 
   render() {
@@ -58,18 +55,25 @@ class Login extends React.Component {
                   <FormGroup>
                     <Label for="Email">Email</Label>
                     <Input
-                      type="email" name="Email" id="Email"
+                      type="email"
+                      name="Email"
+                      id="Email"
                       placeholder="barbara@contoso.com"
                       onChange={this.handleEmailChange}
                     />
                   </FormGroup>
                   <FormGroup>
                     <Label for="Password">Password</Label>
-                    <Input type="password" name="Password" id="Password"
+                    <Input
+                      type="password"
+                      name="Password"
+                      id="Password"
                       onChange={this.handlePasswordChange}
                     />
                   </FormGroup>
-                  <Button type="submit" color="primary">Sign In</Button>
+                  <Button type="submit" color="primary">
+                    Sign In
+                  </Button>
                 </Form>
               </Card>
             </Col>

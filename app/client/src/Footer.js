@@ -16,7 +16,7 @@ class Footer extends React.Component {
 
     this.state = {
       text: '',
-    }
+    };
 
     this.handleSendChange = this.handleSendChange.bind(this);
     this.handleSendClick = this.handleSendClick.bind(this);
@@ -25,20 +25,16 @@ class Footer extends React.Component {
   }
 
   handleSendChange(event) {
-    this.setState({text: event.target.value});
+    this.setState({ text: event.target.value });
   }
 
   handleSendClick(event) {
-    this.props.send(this.state.text).then(
-      () => this.setState({text: ''})
-    );
+    this.props.send(this.state.text).then(() => this.setState({ text: '' }));
   }
 
   handleSendKeyPress(event) {
     if (event.key === 'Enter') {
-      this.props.send(this.state.text).then(
-        () => this.setState({'text': ''})
-      );
+      this.props.send(this.state.text).then(() => this.setState({ text: '' }));
     }
   }
 
@@ -53,7 +49,8 @@ class Footer extends React.Component {
           <Container>
             <InputGroup size="lg" className="mr-3">
               <Input
-                type="text" value={this.state.text}
+                type="text"
+                value={this.state.text}
                 onChange={this.handleSendChange}
                 onKeyPress={this.handleSendKeyPress}
               />

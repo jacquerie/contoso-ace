@@ -12,9 +12,9 @@ class Header extends React.Component {
   }
 
   handleClick() {
-    this.props.logoutEmployee().then(
-      () => this.context.router.history.push('/')
-    );
+    this.props
+      .logoutEmployee()
+      .then(() => this.context.router.history.push('/'));
   }
 
   render() {
@@ -23,18 +23,16 @@ class Header extends React.Component {
         <Navbar dark color="primary" expand="xs">
           <Container>
             <h1 className="navbar-text">Contoso ACE</h1>
-            {this.props.employee !== null &&
+            {this.props.employee !== null && (
               <Nav navbar>
                 <NavItem className="navbar-text mr-3">
                   Hello, {this.props.employee.first_name}!
                 </NavItem>
                 <NavItem>
-                  <NavLink onClick={this.handleClick}>
-                    Sign Out
-                  </NavLink>
+                  <NavLink onClick={this.handleClick}>Sign Out</NavLink>
                 </NavItem>
               </Nav>
-            }
+            )}
           </Container>
         </Navbar>
       </div>
