@@ -78,7 +78,7 @@ def webhook_post():
                     db.session.commit()
 
                 timestamp = message['timestamp']
-                if customer.chats and customer.chats[-1].last_timestamp - timestamp < DAY:
+                if customer.chats and timestamp - customer.chats[-1].last_timestamp < DAY:
                     chat = customer.chats[-1]
                     chat.last_timestamp = timestamp
                 else:
