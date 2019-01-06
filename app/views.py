@@ -16,18 +16,9 @@ app = Blueprint('app', __name__)
 class EntityModel:
     def predict(self, text):
         return [
-            {
-                'snippet': 'Paris',
-                'type': 'LOC',
-            },
-            {
-                'snippet': 'next Monday',
-                'type': 'DATE',
-            },
-            {
-                'snippet': '1:30 local time',
-                'type': 'TIME',
-            },
+            {'snippet': 'Paris', 'type': 'LOC'},
+            {'snippet': 'next Monday', 'type': 'DATE'},
+            {'snippet': '1:30 local time', 'type': 'TIME'},
         ]
 
 
@@ -70,31 +61,27 @@ def webhook_post():
                         facebook_id=facebook_id,
                         first_name=customer_data['first_name'],
                         full_name='{} {}'.format(
-                            customer_data['first_name'],
-                            customer_data['last_name'],
-                        )
+                            customer_data['first_name'], customer_data['last_name']
+                        ),
                     )
                     db.session.add(customer)
                     db.session.commit()
 
                 timestamp = message['timestamp']
-                if customer.chats and timestamp - customer.chats[-1].last_timestamp < DAY:
+                if (
+                    customer.chats
+                    and timestamp - customer.chats[-1].last_timestamp < DAY
+                ):
                     chat = customer.chats[-1]
                     chat.last_timestamp = timestamp
                 else:
-                    chat = Chat(
-                        customer_id=customer.id,
-                        last_timestamp=timestamp,
-                    )
+                    chat = Chat(customer_id=customer.id, last_timestamp=timestamp)
                 db.session.add(chat)
                 db.session.commit()
 
                 text = message['message'].get('text', '')
                 message = Message(
-                    chat_id=chat.id,
-                    sender='customer',
-                    text=text,
-                    timestamp=timestamp,
+                    chat_id=chat.id, sender='customer', text=text, timestamp=timestamp
                 )
                 db.session.add(message)
                 db.session.commit()
@@ -107,20 +94,26 @@ def webhook_post():
 def api_chats():
     chats = Chat.get_unassigned_chats()
 
-    return jsonify([
-        {
-            '_id': chat.id,
-            'customer': {
-                '_id': chat.customer.id,
-                'full_name': chat.customer.full_name,
-            },
-            'message': {
-                '_id': chat.messages[0].id,
-                'text': chat.messages[0].text,
-                'timestamp': chat.messages[0].timestamp,
-            },
-        } for chat in chats
-    ]), 200
+    return (
+        jsonify(
+            [
+                {
+                    '_id': chat.id,
+                    'customer': {
+                        '_id': chat.customer.id,
+                        'full_name': chat.customer.full_name,
+                    },
+                    'message': {
+                        '_id': chat.messages[0].id,
+                        'text': chat.messages[0].text,
+                        'timestamp': chat.messages[0].timestamp,
+                    },
+                }
+                for chat in chats
+            ]
+        ),
+        200,
+    )
 
 
 @app.route('/api/chats/<int:chat_id>', methods=['GET'])
@@ -130,30 +123,33 @@ def api_chat_by_id(chat_id):
     if current_user.id != chat.employee_id:
         return jsonify({'success': False}), 403
 
-    return jsonify({
-        '_id': chat.id,
-        'customer': {
-            '_id': chat.customer.id,
-            'first_name': chat.customer.first_name,
-            'full_name': chat.customer.full_name,
-        },
-        'entities': [
+    return (
+        jsonify(
             {
-                '_id': entity.id,
-                'snippet': entity.snippet,
-                'type': entity.type,
-            } for entity in chat.entities
-        ],
-        'intent': chat.intent,
-        'messages': [
-            {
-                '_id': message.id,
-                'sender': message.sender,
-                'text': message.text,
-                'timestamp': message.timestamp,
-            } for message in chat.messages
-        ],
-    }), 200
+                '_id': chat.id,
+                'customer': {
+                    '_id': chat.customer.id,
+                    'first_name': chat.customer.first_name,
+                    'full_name': chat.customer.full_name,
+                },
+                'entities': [
+                    {'_id': entity.id, 'snippet': entity.snippet, 'type': entity.type}
+                    for entity in chat.entities
+                ],
+                'intent': chat.intent,
+                'messages': [
+                    {
+                        '_id': message.id,
+                        'sender': message.sender,
+                        'text': message.text,
+                        'timestamp': message.timestamp,
+                    }
+                    for message in chat.messages
+                ],
+            }
+        ),
+        200,
+    )
 
 
 @app.route('/api/chats/<int:chat_id>/employees', methods=['POST'])
@@ -180,19 +176,22 @@ def api_chat_add_entity(chat_id):
     entity_data = request.get_json(force=True)
 
     entity = Entity(
-        chat_id=chat_id,
-        snippet=entity_data['snippet'],
-        type=entity_data['type'],
+        chat_id=chat_id, snippet=entity_data['snippet'], type=entity_data['type']
     )
     db.session.add(entity)
     db.session.commit()
 
-    return jsonify({
-        '_id': entity.id,
-        'chat_id': entity.chat_id,
-        'snippet': entity.snippet,
-        'type': entity.type,
-    }), 200
+    return (
+        jsonify(
+            {
+                '_id': entity.id,
+                'chat_id': entity.chat_id,
+                'snippet': entity.snippet,
+                'type': entity.type,
+            }
+        ),
+        200,
+    )
 
 
 @app.route('/api/chats/<int:chat_id>/messages', methods=['POST'])
@@ -218,18 +217,23 @@ def api_chat_add_message(chat_id):
         chat_id=chat_id,
         sender='employee',
         text=message_data['text'],
-        timestamp=int(datetime.now().timestamp() * 1000)
+        timestamp=int(datetime.now().timestamp() * 1000),
     )
     db.session.add(message)
     db.session.commit()
 
-    return jsonify({
-        '_id': message.id,
-        'chat_id': message.chat_id,
-        'sender': 'employee',
-        'text': message.text,
-        'timestamp': message.timestamp,
-    }), 200
+    return (
+        jsonify(
+            {
+                '_id': message.id,
+                'chat_id': message.chat_id,
+                'sender': 'employee',
+                'text': message.text,
+                'timestamp': message.timestamp,
+            }
+        ),
+        200,
+    )
 
 
 @app.route('/api/chats/<int:chat_id>/predict', methods=['POST'])
@@ -243,44 +247,51 @@ def api_chat_predict(chat_id):
     intent_model = IntentModel()
 
     text = '\n'.join(
-        message.text for message in chat.messages if message.sender == 'customer')
+        message.text for message in chat.messages if message.sender == 'customer'
+    )
     entities = entity_model.predict(text)
     intent = intent_model.predict(text)
 
     for entity in chat.entities:
         db.session.delete(entity)
-    db.session.add_all([
-        Entity(
-            chat_id=chat_id,
-            snippet=entity['snippet'],
-            type=entity['type'],
-        ) for entity in entities
-    ])
+    db.session.add_all(
+        [
+            Entity(chat_id=chat_id, snippet=entity['snippet'], type=entity['type'])
+            for entity in entities
+        ]
+    )
     chat.intent = intent
     db.session.add(chat)
     db.session.commit()
 
-    return jsonify({
-        '_id': chat.id,
-        'entities': [
+    return (
+        jsonify(
             {
-                '_id': entity.id,
-                'snippet': entity.snippet,
-                'type': entity.type,
-            } for entity in chat.entities
-        ],
-        'intent': chat.intent,
-    }), 200
+                '_id': chat.id,
+                'entities': [
+                    {'_id': entity.id, 'snippet': entity.snippet, 'type': entity.type}
+                    for entity in chat.entities
+                ],
+                'intent': chat.intent,
+            }
+        ),
+        200,
+    )
 
 
 @app.route('/api/employees/current', methods=['GET'])
 @login_required
 def api_employees_current():
-    return jsonify({
-        '_id': current_user.id,
-        'email': current_user.email,
-        'first_name': current_user.first_name,
-    }), 200
+    return (
+        jsonify(
+            {
+                '_id': current_user.id,
+                'email': current_user.email,
+                'first_name': current_user.first_name,
+            }
+        ),
+        200,
+    )
 
 
 @app.route('/api/employees/login', methods=['POST'])
@@ -288,7 +299,8 @@ def api_employees_login():
     employee_data = request.get_json(force=True)
 
     employee = Employee.get_employee_by_email_and_password(
-        email=employee_data['email'], password=employee_data['password'])
+        email=employee_data['email'], password=employee_data['password']
+    )
 
     if employee:
         login_user(employee)

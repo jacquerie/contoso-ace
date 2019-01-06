@@ -20,7 +20,8 @@ class Config:
 
 
 app = Flask(
-    __name__, template_folder=os.path.join('client', 'build'),
+    __name__,
+    template_folder=os.path.join('client', 'build'),
     static_folder=os.path.join('client', 'build', 'static'),
 )
 app.config.from_object(Config)

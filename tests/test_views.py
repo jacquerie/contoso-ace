@@ -68,11 +68,14 @@ def test_webhook_get_returns_200_on_successful_challenge(client, config, mocker)
     mocker.patch.dict(config, {'FACEBOOK_VERIFY_TOKEN': 'SECRET'})
 
     response = client.get(
-        url_for('app.webhook_get', **{
-            'hub.challenge': 'CHALLENGE',
-            'hub.mode': 'subscribe',
-            'hub.verify_token': 'SECRET',
-        })
+        url_for(
+            'app.webhook_get',
+            **{
+                'hub.challenge': 'CHALLENGE',
+                'hub.mode': 'subscribe',
+                'hub.verify_token': 'SECRET',
+            }
+        )
     )
 
     assert response.status_code == 200
@@ -83,11 +86,14 @@ def test_wehook_get_returns_403_on_failed_challenge(client, config, mocker):
     mocker.patch.dict(config, {'FACEBOOK_VERIFY_TOKEN': 'SECRET'})
 
     response = client.get(
-        url_for('app.webhook_get', **{
-            'hub.challenge': 'CHALLENGE',
-            'hub.mode': 'subscribe',
-            'hub.verify_token': 'WRONG',
-        })
+        url_for(
+            'app.webhook_get',
+            **{
+                'hub.challenge': 'CHALLENGE',
+                'hub.mode': 'subscribe',
+                'hub.verify_token': 'WRONG',
+            }
+        )
     )
 
     assert response.status_code == 403
@@ -96,38 +102,35 @@ def test_wehook_get_returns_403_on_failed_challenge(client, config, mocker):
 
 def test_webhook_post_returns_200_and_handles_the_event(client, config, mocker):
     mock_session = mocker.patch('app.views.db.session')
-    mocker.patch('app.views.MessengerClient.get_user_data', return_value={
-        'first_name': 'Mark',
-        'last_name': 'Zuckerberg',
-    })
+    mocker.patch(
+        'app.views.MessengerClient.get_user_data',
+        return_value={'first_name': 'Mark', 'last_name': 'Zuckerberg'},
+    )
     mocker.patch.dict(config, {'FACEBOOK_PAGE_TOKEN': 'SECRET'})
 
     response = client.post(
         url_for('app.webhook_post'),
         content_type='application/json',
-        data=json.dumps({
-            'entry': [
-                {
-                    'messaging': [
-                        {
-                            'message': {
-                                'text': 'Cool app!',
-                            },
-                            'sender': {
-                                'id': '4',
-                            },
-                            'timestamp': 1545592339658,
-                        },
-                    ],
-                },
-            ],
-        }),
+        data=json.dumps(
+            {
+                'entry': [
+                    {
+                        'messaging': [
+                            {
+                                'message': {'text': 'Cool app!'},
+                                'sender': {'id': '4'},
+                                'timestamp': 1545592339658,
+                            }
+                        ]
+                    }
+                ]
+            }
+        ),
     )
 
     assert mock_session.add.call_count == 3
     assert mock_session.commit.call_count == 3
-    mock_session.commit.assert_has_calls([
-        mock.call(), mock.call(), mock.call()])
+    mock_session.commit.assert_has_calls([mock.call(), mock.call(), mock.call()])
     assert response.status_code == 200
     assert b'OK' in response.data
 
@@ -143,23 +146,21 @@ def test_webhook_post_modifies_the_current_chat_if_it_exists(client, config, moc
     response = client.post(
         url_for('app.webhook_post'),
         content_type='application/json',
-        data=json.dumps({
-            'entry': [
-                {
-                    'messaging': [
-                        {
-                            'message': {
-                                'text': 'I hope they like it in Paris.',
-                            },
-                            'sender': {
-                                'id': '4',
-                            },
-                            'timestamp': 1545592340658,
-                        },
-                    ],
-                },
-            ],
-        }),
+        data=json.dumps(
+            {
+                'entry': [
+                    {
+                        'messaging': [
+                            {
+                                'message': {'text': 'I hope they like it in Paris.'},
+                                'sender': {'id': '4'},
+                                'timestamp': 1545592340658,
+                            }
+                        ]
+                    }
+                ]
+            }
+        ),
     )
 
     assert mock_session.add.call_count == 2
@@ -170,15 +171,21 @@ def test_webhook_post_modifies_the_current_chat_if_it_exists(client, config, moc
 
 
 def test_api_chats_returns_200_and_the_unassigned_chats(client, mocker):
-    mocker.patch('app.views.Chat.get_unassigned_chats', return_value=[
-        MockChat(
-            messages=[
-                MockMessage(),
-                MockMessage(
-                    id=2, text='I hope they like it in Paris.', timestamp=1545592340658),
-            ],
-        ),
-    ])
+    mocker.patch(
+        'app.views.Chat.get_unassigned_chats',
+        return_value=[
+            MockChat(
+                messages=[
+                    MockMessage(),
+                    MockMessage(
+                        id=2,
+                        text='I hope they like it in Paris.',
+                        timestamp=1545592340658,
+                    ),
+                ]
+            )
+        ],
+    )
 
     response = client.get(url_for('app.api_chats'))
 
@@ -187,16 +194,9 @@ def test_api_chats_returns_200_and_the_unassigned_chats(client, mocker):
     expected = [
         {
             '_id': 1,
-            'customer': {
-                '_id': 1,
-                'full_name': 'Mark Zuckerberg',
-            },
-            'message': {
-                '_id': 1,
-                'text': 'Cool app!',
-                'timestamp': 1545592339658,
-            },
-        },
+            'customer': {'_id': 1, 'full_name': 'Mark Zuckerberg'},
+            'message': {'_id': 1, 'text': 'Cool app!', 'timestamp': 1545592339658},
+        }
     ]
     result = json.loads(response.data)
 
@@ -205,18 +205,21 @@ def test_api_chats_returns_200_and_the_unassigned_chats(client, mocker):
 
 def test_api_chat_by_id_returns_200_and_the_requested_chat(client, mocker):
     mocker.patch('app.views.current_user', MockEmployee())
-    mocker.patch('app.views.Chat.get_chat_by_id', return_value=MockChat(
-        entities=[MockEntity()],
-        messages=[
-            MockMessage(),
-            MockMessage(
-                id=2,
-                sender='customer',
-                text='I hope they like it in Paris.',
-                timestamp=1545592340658,
-            ),
-        ],
-    ))
+    mocker.patch(
+        'app.views.Chat.get_chat_by_id',
+        return_value=MockChat(
+            entities=[MockEntity()],
+            messages=[
+                MockMessage(),
+                MockMessage(
+                    id=2,
+                    sender='customer',
+                    text='I hope they like it in Paris.',
+                    timestamp=1545592340658,
+                ),
+            ],
+        ),
+    )
 
     response = client.get(url_for('app.api_chat_by_id', chat_id=1))
 
@@ -224,18 +227,8 @@ def test_api_chat_by_id_returns_200_and_the_requested_chat(client, mocker):
 
     expected = {
         '_id': 1,
-        'customer': {
-            '_id': 1,
-            'first_name': 'Mark',
-            'full_name': 'Mark Zuckerberg',
-        },
-        'entities': [
-            {
-                '_id': 1,
-                'snippet': 'Paris',
-                'type': 'LOC',
-            },
-        ],
+        'customer': {'_id': 1, 'first_name': 'Mark', 'full_name': 'Mark Zuckerberg'},
+        'entities': [{'_id': 1, 'snippet': 'Paris', 'type': 'LOC'}],
         'intent': None,
         'messages': [
             {
@@ -257,19 +250,27 @@ def test_api_chat_by_id_returns_200_and_the_requested_chat(client, mocker):
     assert expected == result
 
 
-def test_api_chat_by_id_returns_403_when_chat_is_not_assigned_to_employee(client, mocker):
+def test_api_chat_by_id_returns_403_when_chat_is_not_assigned_to_employee(
+    client, mocker
+):
     mocker.patch('app.views.current_user', MockEmployee())
-    mocker.patch('app.views.Chat.get_chat_by_id', return_value=MockChat(employee_id=None))
+    mocker.patch(
+        'app.views.Chat.get_chat_by_id', return_value=MockChat(employee_id=None)
+    )
 
     response = client.get(url_for('app.api_chat_by_id', chat_id=1))
 
     assert response.status_code == 403
 
 
-def test_api_chat_add_employee_returns_200_when_chat_is_not_assigned_to_employee(client, mocker):
+def test_api_chat_add_employee_returns_200_when_chat_is_not_assigned_to_employee(
+    client, mocker
+):
     mock_session = mocker.patch('app.views.db.session')
     mocker.patch('app.views.current_user', MockEmployee())
-    mocker.patch('app.views.Chat.get_chat_by_id', return_value=MockChat(employee_id=None))
+    mocker.patch(
+        'app.views.Chat.get_chat_by_id', return_value=MockChat(employee_id=None)
+    )
 
     response = client.post(url_for('app.api_chat_add_employee', chat_id=1))
 
@@ -278,7 +279,9 @@ def test_api_chat_add_employee_returns_200_when_chat_is_not_assigned_to_employee
     assert response.status_code == 200
 
 
-def test_api_chat_add_employee_returns_403_when_chat_is_assigned_to_employee(client, mocker):
+def test_api_chat_add_employee_returns_403_when_chat_is_assigned_to_employee(
+    client, mocker
+):
     mocker.patch('app.views.Chat.get_chat_by_id', return_value=MockChat())
 
     response = client.post(url_for('app.api_chat_add_employee', chat_id=1))
@@ -294,10 +297,7 @@ def test_api_chat_add_entity_returns_200_on_successful_entity_creation(client, m
     response = client.post(
         url_for('app.api_chat_add_entity', chat_id=1),
         content_type='application/json',
-        data=json.dumps({
-            'snippet': 'Paris',
-            'type': 'LOC',
-        }),
+        data=json.dumps({'snippet': 'Paris', 'type': 'LOC'}),
     )
 
     mock_session.add.assert_called_once()
@@ -305,23 +305,26 @@ def test_api_chat_add_entity_returns_200_on_successful_entity_creation(client, m
     assert response.status_code == 200
 
 
-def test_api_chat_add_entity_returns_403_when_chat_is_not_assigned_to_employee(client, mocker):
+def test_api_chat_add_entity_returns_403_when_chat_is_not_assigned_to_employee(
+    client, mocker
+):
     mocker.patch('app.views.current_user', MockEmployee())
-    mocker.patch('app.views.Chat.get_chat_by_id', return_value=MockChat(employee_id=None))
+    mocker.patch(
+        'app.views.Chat.get_chat_by_id', return_value=MockChat(employee_id=None)
+    )
 
     response = client.post(
         url_for('app.api_chat_add_entity', chat_id=1),
         content_type='application/json',
-        data=json.dumps({
-            'snippet': 'Paris',
-            'type': 'LOC',
-        }),
+        data=json.dumps({'snippet': 'Paris', 'type': 'LOC'}),
     )
 
     assert response.status_code == 403
 
 
-def test_api_chat_add_message_returns_200_on_successful_message_creation(client, config, mocker):
+def test_api_chat_add_message_returns_200_on_successful_message_creation(
+    client, config, mocker
+):
     mock_send = mocker.patch('app.views.MessengerClient.send')
     mock_session = mocker.patch('app.views.db.session')
     mocker.patch('app.views.current_user', MockEmployee())
@@ -335,18 +338,20 @@ def test_api_chat_add_message_returns_200_on_successful_message_creation(client,
     )
 
     mock_send.assert_called_once_with(
-        {'text': 'Thanks! I hope so too.'},
-        {'sender': {'id': '4'}},
-        'RESPONSE',
+        {'text': 'Thanks! I hope so too.'}, {'sender': {'id': '4'}}, 'RESPONSE'
     )
     mock_session.add.assert_called_once()
     mock_session.commit.assert_called_once_with()
     assert response.status_code == 200
 
 
-def test_api_chat_add_message_returns_403_when_chat_is_not_assigned_to_employee(client, mocker):
+def test_api_chat_add_message_returns_403_when_chat_is_not_assigned_to_employee(
+    client, mocker
+):
     mocker.patch('app.views.current_user', MockEmployee())
-    mocker.patch('app.views.Chat.get_chat_by_id', return_value=MockChat(employee_id=None))
+    mocker.patch(
+        'app.views.Chat.get_chat_by_id', return_value=MockChat(employee_id=None)
+    )
 
     response = client.post(
         url_for('app.api_chat_add_message', chat_id=1),
@@ -383,9 +388,13 @@ def test_api_chat_predict_returns_200_on_successful_prediction(client, mocker):
     assert response.status_code == 200
 
 
-def test_api_chat_predict_returns_403_when_chat_is_not_assigned_to_employee(client, mocker):
+def test_api_chat_predict_returns_403_when_chat_is_not_assigned_to_employee(
+    client, mocker
+):
     mocker.patch('app.views.current_user', MockEmployee())
-    mocker.patch('app.views.Chat.get_chat_by_id', return_value=MockChat(employee_id=None))
+    mocker.patch(
+        'app.views.Chat.get_chat_by_id', return_value=MockChat(employee_id=None)
+    )
 
     response = client.post(url_for('app.api_chat_predict', chat_id=1))
 
@@ -399,11 +408,7 @@ def test_api_employees_current_returns_200_when_employee_is_logged_in(client, mo
 
     assert response.status_code == 200
 
-    expected = {
-        '_id': 1,
-        'email': 'barbara@contoso.com',
-        'first_name': 'Barbara',
-    }
+    expected = {'_id': 1, 'email': 'barbara@contoso.com', 'first_name': 'Barbara'}
     result = json.loads(response.data)
 
     assert expected == result
@@ -411,15 +416,15 @@ def test_api_employees_current_returns_200_when_employee_is_logged_in(client, mo
 
 def test_api_employees_login_returns_200_on_successful_login(client, mocker):
     mock_login_user = mocker.patch('app.views.login_user')
-    mocker.patch('app.views.Employee.get_employee_by_email_and_password', return_value=MockEmployee())
+    mocker.patch(
+        'app.views.Employee.get_employee_by_email_and_password',
+        return_value=MockEmployee(),
+    )
 
     response = client.post(
         url_for('app.api_employees_login'),
         content_type='application/json',
-        data=json.dumps({
-            'email': 'barbara@contoso.com',
-            'password': 'password',
-        }),
+        data=json.dumps({'email': 'barbara@contoso.com', 'password': 'password'}),
     )
 
     mock_login_user.assert_called_once()
@@ -428,15 +433,14 @@ def test_api_employees_login_returns_200_on_successful_login(client, mocker):
 
 def test_api_employees_login_returns_403_on_failed_login(client, mocker):
     mock_login_user = mocker.patch('app.views.login_user')
-    mocker.patch('app.views.Employee.get_employee_by_email_and_password', return_value=None)
+    mocker.patch(
+        'app.views.Employee.get_employee_by_email_and_password', return_value=None
+    )
 
     response = client.post(
         url_for('app.api_employees_login'),
         content_type='application/json',
-        data=json.dumps({
-            'email': 'barbara@contoso.com',
-            'password': 'wrong password',
-        }),
+        data=json.dumps({'email': 'barbara@contoso.com', 'password': 'wrong password'}),
     )
 
     mock_login_user.assert_not_called()
