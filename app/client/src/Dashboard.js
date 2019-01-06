@@ -1,5 +1,6 @@
 import PropTypes from 'prop-types';
 import React from 'react';
+import { CircleSpinner } from 'react-spinners-kit';
 import {
   Button,
   Card,
@@ -18,6 +19,7 @@ class Dashboard extends React.Component {
 
     this.state = {
       chats: [],
+      loading: true,
     };
 
     this.handleClick = this.handleClick.bind(this);
@@ -39,7 +41,9 @@ class Dashboard extends React.Component {
       response => response.ok ? response.json() : []
     ).then(
       json => this.setState({chats: json})
-    )
+    ).then(
+      () => this.setState({loading: false})
+    );
   }
 
   toRows(chats) {
@@ -90,7 +94,13 @@ class Dashboard extends React.Component {
     return (
       <div className="Dashboard">
         <Container>
-          {this.toRows(this.state.chats)}
+          {this.state.loading ? (
+            <div className="d-flex flex-wrap justify-content-center">
+              <CircleSpinner color="#0077ff" size="96" />
+            </div>
+          ) : (
+            this.toRows(this.state.chats)
+          )}
         </Container>
       </div>
     );

@@ -1,4 +1,5 @@
 import React from 'react';
+import { CircleSpinner } from 'react-spinners-kit';
 import Timestamp from 'react-timestamp';
 import {
   Badge,
@@ -24,6 +25,7 @@ class Chat extends React.Component {
       customer: {},
       entities: [],
       intent: null,
+      loading: true,
       messages: [],
     };
 
@@ -60,6 +62,8 @@ class Chat extends React.Component {
         intent: json.intent,
         messages: json.messages,
       })
+    ).then(
+      () => this.setState({loading: false})
     );
   }
 
@@ -100,20 +104,26 @@ class Chat extends React.Component {
     return (
       <div className="Chat">
         <Container>
-          <Row>
-            <Col xs="8">
-              <Messages
-                customer={this.state.customer}
-                messages={this.state.messages}
-              />
-            </Col>
-            <Col xs={{ offset: 1, size: 3 }}>
-              <Predictions
-                entities={this.state.entities}
-                intent={this.state.intent}
-              />
-            </Col>
-          </Row>
+          {this.state.loading ? (
+            <div className="d-flex flex-wrap justify-content-center">
+              <CircleSpinner color="#0077ff" size="96" />
+            </div>
+          ) : (
+            <Row>
+              <Col xs="8">
+                <Messages
+                  customer={this.state.customer}
+                  messages={this.state.messages}
+                />
+              </Col>
+              <Col xs={{ offset: 1, size: 3 }}>
+                <Predictions
+                  entities={this.state.entities}
+                  intent={this.state.intent}
+                />
+              </Col>
+            </Row>
+          )}
         </Container>
         <Footer
           send={this.send}
